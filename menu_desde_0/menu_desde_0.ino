@@ -1,13 +1,8 @@
-/**********************************
- *  LaBuhardillaDelLoco.xyz
- *  http://bit.ly/2MTrGne
- *  
- **********************************/
-
+#include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 #include <LiquidMenu.h>
 
-LiquidCrystal_I2C lcd(0x27, 16, 2);
+LiquidCrystal_I2C lcd(0x27, 20, 4);
 
 //ENCODER
 #define outputA 6
@@ -25,7 +20,7 @@ int aLastState;
 
 int led_seleccionado = 0;
 
-LiquidLine linea1(1, 0, "Led 1");
+LiquidLine linea1(1, 0, "Led 1 Jaime"); // LA POSICIÒN CERO ES PARA LA FLECHA 
 LiquidLine linea2(1, 1, "Led 2");
 LiquidLine linea3(1, 0, "Led 3");
 LiquidLine linea4(1, 1, "Todos");
@@ -46,8 +41,8 @@ void setup() {
   
   pinMode(sw,INPUT_PULLUP);
   
- //lcd.init();
-  lcd.begin();
+  lcd.init();
+  //lcd.begin(20, 4);
   lcd.backlight();
   
 
