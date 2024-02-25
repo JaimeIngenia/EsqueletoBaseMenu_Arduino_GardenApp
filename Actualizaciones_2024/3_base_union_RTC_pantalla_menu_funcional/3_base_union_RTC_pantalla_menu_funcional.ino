@@ -4,11 +4,6 @@
 
 #include <RTClib.h>
 
-char bufferHora[9];
-
-const byte analogPin = A1;
-unsigned short valorHora = 0;
-
 LiquidCrystal_I2C lcd(0x27, 20, 4);
 
 RTC_DS3231 modulo_rtc;
@@ -27,17 +22,13 @@ int aLastState;
 #define led2 9
 #define led3 10
 
-int contador = 0;
-
-int A_estado_actual;
-int A_ultimo_estado;
-
 int led_seleccionado = 0;
 
-LiquidLine linea5(2, 0, "Ver Hora y temp");
-LiquidLine linea1(1, 1, "Led 1 Jaime"); 
-LiquidLine linea2(1, 2, "Led 2");
-LiquidLine linea4(1, 3, "Todos");
+LiquidLine linea1(1, 0, "Led 1 Jaime"); // LA POSICIÓN CERO ES PARA LA FLECHA 
+LiquidLine linea2(1, 1, "Led 2");
+// LiquidLine linea3(1, 2, "Led 3");
+LiquidLine linea4(1, 2, "Todos");
+LiquidLine linea5(1, 3, "Led 3_modificado");
 LiquidScreen pantalla1(linea1, linea2, linea4, linea5);
 
 LiquidLine linea1_2(1, 0, "ON");
@@ -45,18 +36,11 @@ LiquidLine linea2_2(1, 1, "OFF");
 LiquidLine linea3_2(1, 2, "Atras");
 LiquidScreen pantalla2(linea1_2, linea2_2, linea3_2);
 
-// LiquidLine linea1_5_2(1, 0,"Hora: ",valorHora);
-LiquidLine linea1_5_2(1, 0, "Hora: ", bufferHora);
-LiquidLine linea3_5_2(1, 2, "Atras");
-LiquidScreen pantalla3( linea1_5_2,linea3_5_2);
-
-LiquidMenu menu(lcd, pantalla1, pantalla2, pantalla3);
+LiquidMenu menu(lcd, pantalla1, pantalla2);
 
 char DiasDeLaSemana[7][12] = {"Domingo", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"};
 
 void setup() {
-
-  pinMode(analogPin, INPUT);
 
   Serial.begin(9600);
 
@@ -74,13 +58,16 @@ void setup() {
 
   linea1.set_focusPosition(Position::LEFT); 
   linea2.set_focusPosition(Position::LEFT); 
+  // linea3.set_focusPosition(Position::LEFT); 
   linea4.set_focusPosition(Position::LEFT); 
   linea5.set_focusPosition(Position::LEFT); 
    
-  linea5.attach_function(1, fn_ver_hora_temperatura);
   linea1.attach_function(1, fn_led1); 
   linea2.attach_function(1, fn_led2);
-  linea4.attach_function(1, fn_todos);  
+  // linea3.attach_function(1, fn_led3);
+  linea4.attach_function(1, fn_todos);
+  // linea5.attach_function(1, fn_led3_modificada);
+  linea5.attach_function(1, fn_ver_hora);
   
   menu.add_screen(pantalla1);
   
@@ -94,18 +81,8 @@ void setup() {
    
   menu.add_screen(pantalla2);
 
-  linea1_5_2.add_variable(bufferHora);
-  linea1_5_2.set_focusPosition(Position::LEFT); 
-  linea3_5_2.set_focusPosition(Position::LEFT); 
-  
-  linea1_5_2.attach_function(1, fn_vacio); 
-  linea3_5_2.attach_function(1, fn_atras);
-   
-  menu.add_screen(pantalla3);
-
   pantalla1.set_displayLineCount(4);
   pantalla2.set_displayLineCount(4);
-  pantalla3.set_displayLineCount(4);
 
   menu.set_focusedLine(0);
 
@@ -121,7 +98,6 @@ void setup() {
 }
 
 void loop() {
-  valorHora = analogRead(analogPin);
   selectOption();
 
   aState = digitalRead(outputA); 
@@ -173,48 +149,30 @@ void fn_todos() {
   led_seleccionado = 0;
 }
 
-
-void fn_ver_hora_temperatura() {
+void fn_ver_hora() {
   DateTime ahora = modulo_rtc.now();
-  // Formatea la hora actual en 'bufferHora'.
-  sprintf(bufferHora, "%02d:%02d:%02d", ahora.hour(), ahora.minute(), ahora.second());
-
-  // Cambia a la pantalla que muestra la hora y la temperatura.
-  menu.change_screen(3);
-  menu.set_focusedLine(0);
-
-  // Refresca el menú para mostrar los cambios.
-  menu.update();
-
-  // Puedes quitar el 'delay' si quieres que la pantalla no se congele aquí.
-  // delay(1000);
-}
-
-
-// void fn_ver_hora_temperatura() {
-//   DateTime ahora = modulo_rtc.now();
-//   menu.change_screen(3);
-//   menu.set_focusedLine(0);
-
-//   valorHora = ahora.hour();
   
-//   lcd.clear();
-//   lcd.print(ahora.hour());
-//   lcd.print(':');
-//   lcd.print(ahora.minute());
-//   lcd.print(':');
-//   lcd.print(ahora.second());
+  // Display the current time
+  lcd.clear();
+  lcd.print(ahora.hour());
+  lcd.print(':');
+  lcd.print(ahora.minute());
+  lcd.print(':');
+  lcd.print(ahora.second());
 
-//   lcd.setCursor(0, 1);
-//   lcd.print("Temp: ");
-//   lcd.print(modulo_rtc.getTemperature());
-//   lcd.print(" *C");
+  // Display the temperature
+  lcd.setCursor(0, 1);
+  lcd.print("Temp: ");
+  lcd.print(modulo_rtc.getTemperature());
+  lcd.print(" *C");
 
-//   delay(1000);  
+  // You can add additional logic or delay as needed
+  delay(5000);  // Display for 5 seconds (adjust as needed)
 
-// }
-
-
+  // Switch back to the main menu
+  menu.change_screen(1);
+  menu.set_focusedLine(0);
+}
 
 
 void fn_on() {
@@ -258,8 +216,4 @@ void fn_off() {
 void fn_atras() {
   menu.change_screen(1);
   menu.set_focusedLine(0);
-}
-
-void fn_vacio(){
-
 }
