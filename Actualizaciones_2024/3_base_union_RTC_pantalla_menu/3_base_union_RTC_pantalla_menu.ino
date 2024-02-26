@@ -4,6 +4,8 @@
 
 #include <RTClib.h>
 
+//Codigo funcional
+
 char bufferHora[9];
 
 const byte analogPin = A1;
