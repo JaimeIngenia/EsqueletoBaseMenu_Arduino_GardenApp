@@ -1,3 +1,13 @@
+// #include <Wire.h>		
+// #include <RTClib.h>		
+
+// RTC_DS3231 rtc;			
+
+// bool evento_inicio = true;	
+// bool evento_fin = true;		
+
+// # define RELE 24			
+
 
 #include <Wire.h>
 
@@ -510,3 +520,64 @@ void fn_vacio(){
 
 
 
+
+
+//----------------------------------------------------------------------------------------------------------------------------------------------------------
+// #include <Wire.h>		
+// #include <RTClib.h>		
+
+// RTC_DS3231 rtc;			
+
+// bool evento_inicio = true;	
+// bool evento_fin = true;		
+
+// # define RELE 24			
+
+// void setup () {
+//  Serial.begin(9600);		
+//  pinMode(RELE, OUTPUT);		
+
+//  if (! rtc.begin()) {				
+//  Serial.println("Modulo RTC no encontrado !");	
+//  while (1);					
+//  }
+// }
+
+// void loop () {
+//  DateTime fecha = rtc.now();				
+							
+//  if ( fecha.hour() == 21 && fecha.minute() == 2 ){
+//     if ( evento_inicio == true ){			
+//       digitalWrite(RELE, HIGH);				
+//       Serial.println( "Rele encendido" );		
+//       evento_inicio = false;				
+//     }							
+//   }
+
+//  if ( fecha.hour() == 21 && fecha.minute() == 3 ){	
+//     if ( evento_fin == true ){				
+//       digitalWrite(RELE, LOW);				
+//       Serial.println( "Rele apagado" );			
+//       evento_fin = false;				
+//     }						
+//   }
+
+//  Serial.print(fecha.day());				// funcion que obtiene el dia de la fecha completa
+//  Serial.print("/");					// caracter barra como separador
+//  Serial.print(fecha.month());				// funcion que obtiene el mes de la fecha completa
+//  Serial.print("/");					// caracter barra como separador
+//  Serial.print(fecha.year());				// funcion que obtiene el año de la fecha completa
+//  Serial.print(" ");					// caracter espacio en blanco como separador
+//  Serial.print(fecha.hour());				// funcion que obtiene la hora de la fecha completa
+//  Serial.print(":");					// caracter dos puntos como separador
+//  Serial.print(fecha.minute());				// funcion que obtiene los minutos de la fecha completa
+//  Serial.print(":");					// caracter dos puntos como separador
+//  Serial.println(fecha.second());			// funcion que obtiene los segundos de la fecha completa
+ 
+//  delay(1000);						// demora de 1 segundo
+
+//   if ( fecha.hour() == 2 && fecha.minute() == 0 ){ 	// si hora = 2 y minutos = 0 restablece valores de
+//     evento_inicio = true;				// variables de control en verdadero
+//     evento_fin = true;
+//   }
+// }

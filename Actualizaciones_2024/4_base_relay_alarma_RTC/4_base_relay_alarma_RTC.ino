@@ -15,7 +15,7 @@ RTC_DS3231 rtc;			// crea objeto del tipo RTC_DS3231
 bool evento_inicio = true;	// variable de control para inicio de evento con valor true
 bool evento_fin = true;		// variable de control para finalizacion de evento con valor true
 
-# define RELE 26			// constante RELE con valor 3 que corresponde a pin digital 3
+# define RELE 24			// constante RELE con valor 3 que corresponde a pin digital 3
 				// donde se encuentra conectado el modulo de rele
 void setup () {
  Serial.begin(9600);		// inicializa comunicacion serie a 9600 bps
@@ -30,7 +30,7 @@ void setup () {
 void loop () {
  DateTime fecha = rtc.now();				// funcion que devuelve fecha y horario en formato
 							// DateTime y asigna a variable fecha
- if ( fecha.hour() == 19 && fecha.minute() == 46 ){	// si hora = 14 y minutos = 30
+ if ( fecha.hour() == 20 && fecha.minute() == 36 ){	// si hora = 14 y minutos = 30
     if ( evento_inicio == true ){			// si evento_inicio es verdadero
       digitalWrite(RELE, HIGH);				// activa modulo de rele con nivel alto
       Serial.println( "Rele encendido" );		// muestra texto en monitor serie
@@ -38,7 +38,7 @@ void loop () {
     }							// para evitar ingresar mas de una vez
   }
 
- if ( fecha.hour() == 19 && fecha.minute() == 47 ){	// si hora = 15 y minutos = 30
+ if ( fecha.hour() == 20 && fecha.minute() == 37 ){	// si hora = 15 y minutos = 30
     if ( evento_fin == true ){				// si evento_fin es verdadero
       digitalWrite(RELE, LOW);				// desactiva modulo de rele con nivel bajo
       Serial.println( "Rele apagado" );			// muestra texto en monitor serie
