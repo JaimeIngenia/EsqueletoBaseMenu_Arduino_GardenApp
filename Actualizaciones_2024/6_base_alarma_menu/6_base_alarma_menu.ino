@@ -1,12 +1,12 @@
-// #include <Wire.h>		
-// #include <RTClib.h>		
 
-// RTC_DS3231 rtc;			
+#include <RTClib.h>		
 
-// bool evento_inicio = true;	
-// bool evento_fin = true;		
+RTC_DS3231 rtc;			
 
-// # define RELE 24			
+bool evento_inicio = true;	
+bool evento_fin = true;		
+
+# define RELE 24			
 
 
 #include <Wire.h>
@@ -15,14 +15,12 @@
 
 #include <LiquidMenu.h>
 
-  
 
-#include <RTClib.h>
 
   
 
 char bufferHora[9];
-
+char bufferHora2[13];
   
 
 const byte analogPin = A1;
@@ -80,9 +78,9 @@ int led_seleccionado = 0;
 
   
 
-LiquidLine linea5(2, 0, "Ver Hora y temp");
+LiquidLine linea5(1, 0, "Ver Hora y temp");
 
-LiquidLine linea1(1, 1, "Led 1 Jaime");
+LiquidLine linea1(1, 1, "Configurar Riego");
 
 LiquidLine linea2(1, 2, "Led 2");
 
@@ -110,9 +108,21 @@ LiquidLine linea3_5_2(1, 2, "Atras");
 
 LiquidScreen pantalla3( linea1_5_2,linea3_5_2);
 
+
+
+
+LiquidLine linea1_6_2(1, 0, "Modifica los minutos: ");
+
+LiquidLine linea2_6_2(1, 0, "", bufferHora2);
+
+LiquidLine linea3_6_2(1, 2, "Atras");
+
+LiquidScreen pantalla4( linea1_6_2,linea2_6_2,linea3_6_2);
+
+
   
 
-LiquidMenu menu(lcd, pantalla1, pantalla2, pantalla3);
+LiquidMenu menu(lcd, pantalla1, pantalla2, pantalla3, pantalla4);
 
   
 
@@ -122,111 +132,155 @@ char DiasDeLaSemana[7][12] = {"Domingo", "Lunes", "Martes", "Miercoles", "Jueves
 
 void setup() {
 
-  
+	
+              pinMode(RELE, OUTPUT);		
 
- pinMode(analogPin, INPUT);
-
-  
-
- Serial.begin(9600);
-
-  
-
- pinMode(led1, OUTPUT);
-
- pinMode(led2, OUTPUT);
-
- pinMode(led3, OUTPUT);
-
- pinMode(sw, INPUT_PULLUP);
-
- lcd.init();
- 
- lcd.begin(20, 4);
-
- lcd.backlight();
+               if (! rtc.begin()) {				
+               Serial.println("Modulo RTC no encontrado !");	
+               while (1);					
+               }
 
   
 
- menu.init();
+              pinMode(analogPin, INPUT);
 
-  
+                
 
- linea1.set_focusPosition(Position::LEFT);
+              Serial.begin(9600);
 
- linea2.set_focusPosition(Position::LEFT);
+                
 
- linea4.set_focusPosition(Position::LEFT);
+              pinMode(led1, OUTPUT);
 
- linea5.set_focusPosition(Position::LEFT);
+              pinMode(led2, OUTPUT);
 
- linea5.attach_function(1, fn_ver_hora_temperatura);
+              pinMode(led3, OUTPUT);
 
- linea1.attach_function(1, fn_led1);
+              pinMode(sw, INPUT_PULLUP);
 
- linea2.attach_function(1, fn_led2);
+              lcd.init();
+              
+              lcd.begin(20, 4);
 
- linea4.attach_function(1, fn_todos); 
+              lcd.backlight();
 
- menu.add_screen(pantalla1);
+                
 
- linea1_2.set_focusPosition(Position::LEFT);
+              menu.init();
 
- linea2_2.set_focusPosition(Position::LEFT);
+                
 
- linea3_2.set_focusPosition(Position::LEFT);
+              linea1.set_focusPosition(Position::LEFT);
 
- linea1_2.attach_function(1, fn_on);
+              linea2.set_focusPosition(Position::LEFT);
 
- linea2_2.attach_function(1, fn_off);
+              linea4.set_focusPosition(Position::LEFT);
 
- linea3_2.attach_function(1, fn_atras);
+              linea5.set_focusPosition(Position::LEFT);
 
- menu.add_screen(pantalla2);
+              linea5.attach_function(1, fn_ver_hora_temperatura);
 
-  
+              linea1.attach_function(1, fn_led1);
 
- linea1_5_2.add_variable(bufferHora);
+              linea2.attach_function(1, fn_led2);
 
- linea1_5_2.set_focusPosition(Position::LEFT);
+              linea4.attach_function(1, fn_todos); 
 
- linea3_5_2.set_focusPosition(Position::LEFT);
+              menu.add_screen(pantalla1);
 
- linea1_5_2.attach_function(1, fn_vacio);
+              linea1_2.set_focusPosition(Position::LEFT);
 
- linea3_5_2.attach_function(1, fn_atras);
+              linea2_2.set_focusPosition(Position::LEFT);
 
- menu.add_screen(pantalla3);
+              linea3_2.set_focusPosition(Position::LEFT);
 
-  
+              linea1_2.attach_function(1, fn_on);
 
- pantalla1.set_displayLineCount(4);
+              linea2_2.attach_function(1, fn_off);
 
- pantalla2.set_displayLineCount(4);
+              linea3_2.attach_function(1, fn_atras);
 
- pantalla3.set_displayLineCount(4);
+              menu.add_screen(pantalla2);
 
-  
+                
 
- menu.set_focusedLine(0);
+              linea1_5_2.add_variable(bufferHora);
 
-  
+              linea1_5_2.set_focusPosition(Position::LEFT);
 
- menu.update();
+              linea3_5_2.set_focusPosition(Position::LEFT);
 
-  
+              linea1_5_2.attach_function(1, fn_vacio);
 
- if( !modulo_rtc.begin() )
+              linea3_5_2.attach_function(1, fn_atras);
 
- {
+              menu.add_screen(pantalla3);
 
- Serial.println("No se encontró ningun RTC");
+              //--------
 
- Serial.flush();
+              
 
- abort();
+              
+              linea1_6_2.set_focusPosition(Position::LEFT);
 
- }
+              linea2_6_2.add_variable(bufferHora2);
+
+              linea2_6_2.set_focusPosition(Position::CUSTOM);
+
+              linea3_6_2.set_focusPosition(Position::LEFT);
+
+
+              linea1_6_2.attach_function(1, fn_vacio);
+
+              linea2_6_2.attach_function(1, fn_alarma);
+
+              linea3_6_2.attach_function(1, fn_atras);
+
+              menu.add_screen(pantalla4);
+
+              
+
+// LiquidLine linea1_6_2(1, 0, "Modifica los minutos: ", bufferHora2);
+
+// LiquidLine linea2_6_2(1, 2, "Atras");
+
+// LiquidScreen pantalla4( linea1_6_2,linea2_6_2);
+
+// --------------------
+
+                
+
+              pantalla1.set_displayLineCount(4);
+
+              pantalla2.set_displayLineCount(4);
+
+              pantalla3.set_displayLineCount(4);
+
+              pantalla4.set_displayLineCount(4);
+
+                
+
+              menu.set_focusedLine(0);
+
+                
+
+              menu.update();
+
+                
+
+              if( !modulo_rtc.begin() )
+
+              {
+
+                    Serial.println("No se encontró ningun RTC");
+
+                    Serial.flush();
+
+                    abort();
+
+              }
+
+            
 
   
 
@@ -282,11 +336,11 @@ void selectOption() {
 
 void fn_led1() {
 
- menu.change_screen(2);
+ menu.change_screen(4);
 
  menu.set_focusedLine(0);
 
- led_seleccionado = 1;
+//  led_seleccionado = 1;
 
 }
 
@@ -513,6 +567,12 @@ void fn_vacio(){
 
 }
 
+
+void fn_alarma(){
+
+  
+
+}
 
 
 
