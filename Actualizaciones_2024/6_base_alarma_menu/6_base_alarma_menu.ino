@@ -19,7 +19,7 @@ bool evento_fin = true;
 
   
 
-char bufferHora[9];
+char bufferHora[9]; 
 char bufferHora2[13];
   
 
@@ -78,15 +78,13 @@ int led_seleccionado = 0;
 
   
 
-LiquidLine linea5(1, 0, "Ver Hora y temp");
 
 LiquidLine linea1(1, 1, "Configurar Riego");
-
 LiquidLine linea2(1, 2, "Led 2");
+LiquidLine linea3(1, 3, "Todos");
+LiquidLine linea4(1, 0, "Ver Hora y temp");
 
-LiquidLine linea4(1, 3, "Todos");
-
-LiquidScreen pantalla1(linea1, linea2, linea4, linea5);
+LiquidScreen pantalla1(linea1, linea2, linea3, linea4);
 
   
 
@@ -104,16 +102,18 @@ LiquidScreen pantalla2(linea1_2, linea2_2, linea3_2);
 
 LiquidLine linea1_5_2(1, 0, "Hora: ", bufferHora);
 
+LiquidLine linea2_5_2(1, 1, "P ", bufferHora);
+
 LiquidLine linea3_5_2(1, 2, "Atras");
 
-LiquidScreen pantalla3( linea1_5_2,linea3_5_2);
+LiquidScreen pantalla3( linea1_5_2,linea2_5_2,linea3_5_2);
 
 
 
 
-LiquidLine linea1_6_2(1, 0, "Modifica los minutos: ");
+LiquidLine linea1_6_2(1, 0, "Modifica los min:");
 
-LiquidLine linea2_6_2(1, 0, "", bufferHora2);
+LiquidLine linea2_6_2(1, 1, bufferHora2);
 
 LiquidLine linea3_6_2(1, 2, "Atras");
 
@@ -133,110 +133,127 @@ char DiasDeLaSemana[7][12] = {"Domingo", "Lunes", "Martes", "Miercoles", "Jueves
 void setup() {
 
 	
-              pinMode(RELE, OUTPUT);		
+            pinMode(RELE, OUTPUT);		
 
-               if (! rtc.begin()) {				
-               Serial.println("Modulo RTC no encontrado !");	
-               while (1);					
-               }
+            if (! rtc.begin()) {				
+              Serial.println("Modulo RTC no encontrado !");	
+              while (1);					
+            }
 
   
 
-              pinMode(analogPin, INPUT);
-
-                
-
-              Serial.begin(9600);
-
-                
-
-              pinMode(led1, OUTPUT);
-
-              pinMode(led2, OUTPUT);
-
-              pinMode(led3, OUTPUT);
-
-              pinMode(sw, INPUT_PULLUP);
-
-              lcd.init();
-              
-              lcd.begin(20, 4);
-
-              lcd.backlight();
-
-                
-
-              menu.init();
-
-                
-
-              linea1.set_focusPosition(Position::LEFT);
-
-              linea2.set_focusPosition(Position::LEFT);
-
-              linea4.set_focusPosition(Position::LEFT);
-
-              linea5.set_focusPosition(Position::LEFT);
-
-              linea5.attach_function(1, fn_ver_hora_temperatura);
-
-              linea1.attach_function(1, fn_led1);
-
-              linea2.attach_function(1, fn_led2);
-
-              linea4.attach_function(1, fn_todos); 
-
-              menu.add_screen(pantalla1);
-
-              linea1_2.set_focusPosition(Position::LEFT);
-
-              linea2_2.set_focusPosition(Position::LEFT);
-
-              linea3_2.set_focusPosition(Position::LEFT);
-
-              linea1_2.attach_function(1, fn_on);
-
-              linea2_2.attach_function(1, fn_off);
-
-              linea3_2.attach_function(1, fn_atras);
-
-              menu.add_screen(pantalla2);
-
-                
-
-              linea1_5_2.add_variable(bufferHora);
-
-              linea1_5_2.set_focusPosition(Position::LEFT);
-
-              linea3_5_2.set_focusPosition(Position::LEFT);
-
-              linea1_5_2.attach_function(1, fn_vacio);
-
-              linea3_5_2.attach_function(1, fn_atras);
-
-              menu.add_screen(pantalla3);
-
-              //--------
+            pinMode(analogPin, INPUT);
 
               
 
+            Serial.begin(9600);
+
               
-              linea1_6_2.set_focusPosition(Position::LEFT);
 
-              linea2_6_2.add_variable(bufferHora2);
+            pinMode(led1, OUTPUT);
 
-              linea2_6_2.set_focusPosition(Position::CUSTOM);
+            pinMode(led2, OUTPUT);
 
-              linea3_6_2.set_focusPosition(Position::LEFT);
+            pinMode(led3, OUTPUT);
+
+            pinMode(sw, INPUT_PULLUP);
+
+            lcd.init();
+            
+            lcd.begin(20, 4);
+
+            lcd.backlight();
+
+              
+
+            menu.init();
+
+              
+
+            linea1.set_focusPosition(Position::LEFT);
+
+            linea2.set_focusPosition(Position::LEFT);
+
+            linea3.set_focusPosition(Position::LEFT);
+
+            linea4.set_focusPosition(Position::LEFT);
 
 
-              linea1_6_2.attach_function(1, fn_vacio);
+            linea1.attach_function(1, fn_led1);
 
-              linea2_6_2.attach_function(1, fn_alarma);
+            linea2.attach_function(1, fn_led2);
 
-              linea3_6_2.attach_function(1, fn_atras);
+            linea3.attach_function(1, fn_todos); 
 
-              menu.add_screen(pantalla4);
+            linea4.attach_function(1, fn_ver_hora_temperatura);
+            
+            menu.add_screen(pantalla1);
+
+
+
+
+            linea1_2.set_focusPosition(Position::LEFT);
+
+            linea2_2.set_focusPosition(Position::LEFT);
+
+            linea3_2.set_focusPosition(Position::LEFT);
+
+            linea1_2.attach_function(1, fn_on);
+
+            linea2_2.attach_function(1, fn_off);
+
+            linea3_2.attach_function(1, fn_atras);
+
+            menu.add_screen(pantalla2);
+
+
+
+
+
+            linea1_5_2.add_variable(bufferHora);
+
+            linea1_5_2.set_focusPosition(Position::LEFT);
+
+
+            linea2_5_2.add_variable(bufferHora);
+
+            linea2_5_2.set_focusPosition(Position::LEFT);
+
+
+            linea3_5_2.set_focusPosition(Position::LEFT);
+
+
+            linea1_5_2.attach_function(1, fn_vacio);
+
+            linea2_5_2.attach_function(1, fn_vacio);
+
+            linea3_5_2.attach_function(1, fn_atras);
+
+
+            menu.add_screen(pantalla3);
+
+
+
+            //--------
+              
+
+            
+            linea1_6_2.set_focusPosition(Position::LEFT);
+
+            linea2_6_2.add_variable(bufferHora2);
+
+            linea2_6_2.set_focusPosition(Position::LEFT);
+
+            linea3_6_2.set_focusPosition(Position::LEFT);
+
+
+            linea1_6_2.attach_function(1, fn_vacio);
+
+            linea2_6_2.attach_function(1, fn_alarma);
+
+            linea3_6_2.attach_function(1, fn_atras);
+
+            menu.add_screen(pantalla4);
 
               
 
@@ -401,7 +418,8 @@ void fn_ver_hora_temperatura() {
 
  // Formatea la hora actual en 'bufferHora'.
 
- sprintf(bufferHora, "%02d:%02d:%02d", ahora.hour(), ahora.minute(), ahora.second());
+//  sprintf(bufferHora, "%02d:%02d:%02d", ahora.hour(), ahora.minute(), ahora.second());
+ sprintf(bufferHora, "%02d:%02d", ahora.hour(), ahora.minute());
 
   
 
