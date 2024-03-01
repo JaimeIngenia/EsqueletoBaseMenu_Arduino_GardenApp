@@ -21,6 +21,7 @@ bool evento_fin = true;
 
 char bufferHora[9]; 
 char bufferHora2[13];
+int tempBufferHora2 = 0;
   
 
 const byte analogPin = A1;
@@ -113,7 +114,7 @@ LiquidScreen pantalla3( linea1_5_2,linea2_5_2,linea3_5_2);
 
 LiquidLine linea1_6_2(1, 0, "Modifica los min:");
 
-LiquidLine linea2_6_2(1, 1, bufferHora2);
+LiquidLine linea2_6_2(1, 1,"Modifica min", bufferHora2);
 
 LiquidLine linea3_6_2(1, 2, "Atras");
 
@@ -128,7 +129,93 @@ LiquidMenu menu(lcd, pantalla1, pantalla2, pantalla3, pantalla4);
 
 char DiasDeLaSemana[7][12] = {"Domingo", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"};
 
+// void fn_alarma() {
+//   Serial.print("Nuevo valor: ");
+//   while (!Serial.available()) {
+//     // Espera a que haya datos disponibles en el puerto serie
+//   }
+
+//   int inputValue = Serial.parseInt();  // Lee el valor entero desde el puerto serie
   
+//   if (inputValue >= 0 && inputValue <= 60) {
+//     tempBufferHora2 = inputValue;
+//     menu.update();
+//   } else {
+//     // Manejar entrada no válida
+//   }
+
+//   // Limpia el buffer del puerto serie
+//   while (Serial.available()) {
+//     Serial.read();
+//   }
+// }
+// void fn_alarma() {
+//   Serial.print("Nuevo valor: ");
+  
+//   while (!Serial.available()) {
+//     // Espera a que haya datos disponibles en el puerto serie
+//   }
+
+//   int inputValue = Serial.parseInt();  // Lee el valor entero desde el puerto serie
+  
+//   if (inputValue >= 0 && inputValue <= 60) {
+//     tempBufferHora2 = inputValue;
+//   } else {
+//     // Manejar entrada no válida
+//     Serial.println("Valor no válido. Debe estar entre 0 y 60.");
+//   }
+
+//   // Limpia el buffer del puerto serie
+//   while (Serial.available()) {
+//     Serial.read();
+//   }
+// }
+void fn_alarma() {
+  int inputValue = tempBufferHora2;
+
+  // Muestra el valor actual en pantalla
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Nuevo valor: ");
+  lcd.print(inputValue);
+
+  // Espera a que se realice un giro del encoder
+  while (true) {
+    aState = digitalRead(outputA);
+    if (aState != aLastState) {
+      if (digitalRead(outputB) != aState) {
+        inputValue++; // Incrementa el valor si el encoder gira en una dirección
+      } else {
+        inputValue--; // Decrementa el valor si el encoder gira en la otra dirección
+      }
+
+      // Asegúrate de que inputValue esté en el rango deseado
+      inputValue = constrain(inputValue, 0, 60);
+
+      // Actualiza el valor en la variable
+      tempBufferHora2 = inputValue;
+
+      // Muestra el valor actualizado en pantalla
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      lcd.print("Nuevo valor: ");
+      lcd.print(inputValue);
+
+      // Espera un breve tiempo para evitar la lectura continua del encoder
+      delay(200);
+    }
+
+    // Almacena el estado actual del encoder
+    aLastState = aState;
+
+    // Espera a que se realice otro giro del encoder
+    delay(10);
+  }
+
+  // Vuelve al menú principal
+  menu.set_focusedLine(&linea2_6_2);
+}
+
 
 void setup() {
 
@@ -241,8 +328,8 @@ void setup() {
             linea1_6_2.set_focusPosition(Position::LEFT);
 
             linea2_6_2.add_variable(bufferHora2);
-
             linea2_6_2.set_focusPosition(Position::LEFT);
+            //linea2_6_2.set_editAction(fn_alarma);
 
             linea3_6_2.set_focusPosition(Position::LEFT);
 
@@ -317,22 +404,24 @@ void loop() {
 
  if (aState != aLastState){ 
 
- if (digitalRead(outputB) != aState) {
+    if (digitalRead(outputB) != aState) {
 
- menu.switch_focus(false);
+    menu.switch_focus(false);
 
- } else {
+    } else {
 
- menu.switch_focus(true);
+    menu.switch_focus(true);
 
- }
+    }
 
- menu.update();
+    menu.update();
 
- aLastState = aState;
+    aLastState = aState;
 
- }
+  }
 
+  // sprintf(bufferHora2, "%02d", tempBufferHora2); // Jaime noooo
+  snprintf(bufferHora2, sizeof(bufferHora2), "%02d", tempBufferHora2);
 }
 
   
@@ -580,13 +669,6 @@ void fn_atras() {
   
 
 void fn_vacio(){
-
-  
-
-}
-
-
-void fn_alarma(){
 
   
 
