@@ -11,6 +11,14 @@ const byte analogPin = A1;
 unsigned short valorHora = 0;
 char bufferHora[9]; 
 float temperatura = 0.0; 
+bool evento_inicio = true;	// variable de control para inicio de evento con valor true
+bool evento_fin = true;		// variable de control para finalizacion de evento con valor true
+DateTime fecha_Alarma_Inicio_Riego;
+DateTime fecha_Alarma_Fin_Riego;
+int hora_alarma=0;
+int minuto_alarma=0;
+int segundo_alarma=0;
+
 //LCD
 LiquidCrystal_I2C lcd(0x27, 20, 4);
 //ENCODER
@@ -20,7 +28,7 @@ LiquidCrystal_I2C lcd(0x27, 20, 4);
 int aState;
 int aLastState;  
 int led_seleccionado = 10;
-int variableMostrarPantalla = 0;
+int variableMostrarPantalla = 10; // 10 segundo
 //estados
 int salida=0;
 int estado=1;
@@ -61,6 +69,13 @@ void setup() {
   lcd.init();
   lcd.backlight();
   menu.init();
+
+  pinMode(RELE, OUTPUT);		// pin 3 como salida
+
+   if (! rtc.begin()) {				// si falla la inicializacion del modulo
+    Serial.println("Modulo RTC no encontrado !");	// muestra mensaje de error
+    while (1);					// bucle infinito que detiene ejecucion del programa
+  }
 
   linea1.set_focusPosition(Position::LEFT); 
   linea2.set_focusPosition(Position::LEFT);
@@ -105,6 +120,8 @@ void setup() {
 
 void loop() {
 
+   DateTime fecha_Alarma_Inicio_Riego = rtc.now();	
+
   selectOption();
   estado = digitalRead(sw);
    // Debounce
@@ -123,6 +140,20 @@ void loop() {
       menu.update();
       aLastState = aState;
   }
+
+        // Actualizar la alarma basándose en la hora de inicio (6 AM) y los segundos seleccionados
+
+  DateTime alarmaFin = calcularAlarmaRiego(fecha_Alarma_Inicio_Riego,variableMostrarPantalla);
+  // Serial.println("-------------------------------------------------------------------");
+  
+  // Serial.print("Año: "); Serial.print(fecha_Alarma_Inicio_Riego.year(), DEC);
+  // Serial.print(" Mes: "); Serial.print(fecha_Alarma_Inicio_Riego.month(), DEC);
+  // Serial.print(" Día: "); Serial.print(fecha_Alarma_Inicio_Riego.day(), DEC);
+  // Serial.print(" Hora: "); Serial.print(fecha_Alarma_Inicio_Riego.hour(), DEC);
+  // Serial.print(" Minuto: "); Serial.print(fecha_Alarma_Inicio_Riego.minute(), DEC);
+  // Serial.print(" Segundo: "); Serial.print(fecha_Alarma_Inicio_Riego.second(), DEC);
+  
+  // Serial.println("\n-------------------------------------------------------------------");
 
 }
 
@@ -178,8 +209,11 @@ void arrancar()
   }  
 }
 
+
+
 //*******************************************************
 //FUNCIÓN PULSADOR SOSTENIDO START
+
 void funcion_editando()
 {
     
@@ -190,11 +224,11 @@ void funcion_editando()
           aState = digitalRead(outputA);
           if (aState != aLastState) {     
               if (digitalRead(outputB) != aState) { 
-                  // Incrementar y limitar al rango de 0 a 5
-                  variableMostrarPantalla = (variableMostrarPantalla + 1) % 6;
+                  // Incrementar y limitar al rango de 0 a 360 segundos es decir 5 minutos
+                  variableMostrarPantalla = (variableMostrarPantalla + 1) % 301;
               } else {
-                  // Decrementar y limitar al rango de 0 a 5
-                  variableMostrarPantalla = (variableMostrarPantalla - 1 + 6) % 6;
+                  // Decrementar y limitar al rango de 0 a 360 segundos es decir 5 minutos
+                  variableMostrarPantalla = (variableMostrarPantalla - 1 + 301) % 301;
               }
               menu.update();
               aLastState = aState;
@@ -240,6 +274,68 @@ void funcion_apagar()
     }
 }
 
+// Función para actualizar la alarma dependiendo de los segundos ingresados, ya que todos los dìas comienza a las 6am y termina dependiendo de los segundos que ingresen para apagar el relay
+DateTime calcularAlarmaRiego(DateTime fecha_Alarma_Inicio_Riego,int segundos) {
+    
+
+  if ( fecha_Alarma_Inicio_Riego.hour() == 18 && fecha_Alarma_Inicio_Riego.minute() == 30  && fecha_Alarma_Inicio_Riego.second() == 15)
+  {
+    if ( evento_inicio == true ){		
+      digitalWrite(RELE, HIGH);			
+      Serial.println( "Rele encendido" );		
+      evento_inicio = false;		
+
+      Serial.println("-------------------------------------------------------------------");
+      Serial.print(" fecha_Alarma_Inicio_Riego: ");
+      Serial.print(" Hora: "); Serial.print(fecha_Alarma_Inicio_Riego.hour(), DEC);
+      Serial.print(" Minuto: "); Serial.print(fecha_Alarma_Inicio_Riego.minute(), DEC);
+      Serial.print(" Segundo: "); Serial.print(fecha_Alarma_Inicio_Riego.second(), DEC);
+      
+      Serial.println("\n-------------------------------------------------------------------");
+
+      DateTime fecha_Alarma_Fin_Riego = fecha_Alarma_Inicio_Riego + TimeSpan(segundos);
+      hora_alarma=fecha_Alarma_Fin_Riego.hour();
+      minuto_alarma=fecha_Alarma_Fin_Riego.minute();
+      segundo_alarma=fecha_Alarma_Fin_Riego.second();
+
+      Serial.println("-------------------------------------------------------------------");
+      Serial.print(" fecha_Alarma_Fin_Riego: ");
+      Serial.print(" Hora: "); Serial.print(fecha_Alarma_Fin_Riego.hour(), DEC);
+      Serial.print(" Minuto: "); Serial.print(fecha_Alarma_Fin_Riego.minute(), DEC);
+      Serial.print(" Segundo: "); Serial.print(fecha_Alarma_Fin_Riego.second(), DEC);
+      Serial.print(" Hora_Variable: ");
+      Serial.print(hora_alarma);
+      Serial.print(" Minuto_Variable: ");
+      Serial.print(minuto_alarma);
+      Serial.print(" Hora_Variable: ");
+      Serial.print(hora_alarma);
+       
+
+      
+      Serial.println("\n-------------------------------------------------------------------");	
+    }	
+
+
+    
+
+  }
+
+  //DateTime fecha_Alarma_Fin_Riego = fecha_Alarma_Inicio_Riego + TimeSpan(segundos);
+
+  if ( fecha_Alarma_Inicio_Riego.hour() == hora_alarma && 
+      fecha_Alarma_Inicio_Riego.minute() == minuto_alarma  && 
+      fecha_Alarma_Inicio_Riego.second() == segundo_alarma)
+      {	
+      if ( evento_fin == true ){				
+        digitalWrite(RELE, LOW);				
+        Serial.println( "Rele apagado" );			
+        evento_fin = false;				
+      }							
+    }
+
+    return fecha_Alarma_Fin_Riego;
+}
+
 
 void fn_on(){
 }
@@ -262,7 +358,7 @@ void fn_atras(){
 }
 
 void fn_Hora_temperatura_RTC(){
-  
+
   DateTime ahora = modulo_rtc.now();
   sprintf(bufferHora, "%02d:%02d", ahora.hour(), ahora.minute());
   
@@ -272,4 +368,5 @@ void fn_Hora_temperatura_RTC(){
   menu.set_focusedLine(2);
   menu.update();
 }
+
 
