@@ -1,4 +1,4 @@
-//Estamos en 1era_RTC_Relay
+//Estamos en 1da_humedad
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 #include <LiquidMenu.h>
