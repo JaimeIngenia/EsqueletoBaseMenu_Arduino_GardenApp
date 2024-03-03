@@ -12,6 +12,17 @@ int led_seleccionado = 10;
 // Variable para controlar si estás en modo de edición de la variable
 bool editingMode = false;
 int variableMostrarPantalla = 0;
+//estados
+int salida=0;
+int estado=1;
+int estadoAnterior=1;
+enum estados {
+  EST_ENCENDIDO_EDITAR,
+  EST_LOGICA_EDITAR,
+  EST_APAGADO_EDITAR,
+};
+int estado_actual=EST_ENCENDIDO_EDITAR;
+int estado_anterior=EST_APAGADO_EDITAR;
 LiquidLine linea1(1, 0, "Led 1 Jaime"); // LA POSICIÒN CERO ES PARA LA FLECHA 
 LiquidScreen pantalla1(linea1);
 LiquidLine linea1_2(1, 0, "ON");
@@ -39,7 +50,6 @@ void setup() {
   linea2_2.attach_function(1, fn_off);
   linea3_2.attach_function(1, fn_atras);
   linea4_2.attach_function(1, fn_variable);
-  linea4_2.attach_function(2, fn_cambio_variable);
   linea4_2.add_variable(variableMostrarPantalla);
   menu.add_screen(pantalla2);
   pantalla1.set_displayLineCount(4);
@@ -49,6 +59,15 @@ void setup() {
 }
 void loop() {
   selectOption();
+  estado = digitalRead(sw);
+   // Debounce
+  if (estado != estadoAnterior) {
+    delay(60);  // Ajusta este valor según sea necesario
+    estado = digitalRead(sw);
+  }
+  // Serial.print("ESTADO INICIAL:");
+  // Serial.println(estado);
+  // delay(8000);
 
   if (editingMode) {
     handleVariableEditing();
@@ -69,7 +88,7 @@ void loop() {
 }
 
 void handleNavigation() {
-  Serial.println("Estas en modo handleNavigation");	
+  //Serial.println("Estas en modo handleNavigation");	
   // menu.set_focusedLine(3);
   aState = digitalRead(outputA); 
   if (aState != aLastState) {     
@@ -83,16 +102,147 @@ void handleNavigation() {
   }
 }
 
+// void handleVariableEditing() {
+
+//   Serial.println("Estas en modo edición********************************");	
+//   Serial.println(editingMode);
+//   if(editingMode == true){
+
+//         if (digitalRead(sw) == LOW) {
+//           editingMode = false;
+//           Serial.println("Estas en modo edición y sw = LOW");	
+//         } else {
+//           Serial.println("Estas en modo edición y sw = HIGTH");	
+//           aState = digitalRead(outputA);
+//           if (aState != aLastState) {     
+//             if (digitalRead(outputB) != aState) { 
+//               variableMostrarPantalla++;
+//             } else {
+//               variableMostrarPantalla--;
+//             }
+//             menu.update();
+//             aLastState = aState;
+//           }
+//         }
+
+
+
+//   }else{
+//     Serial.println("No deberías estar en modo edición********************************-------------------------------------------");	
+//   }
+
+// }
 void handleVariableEditing() {
+  // Serial.println("Estas en modo edición********************************");	
 
-  Serial.println("Estas en modo edición********************************");	
-  if(editingMode == true){
+  // if (digitalRead(sw) == LOW) {
+  //   editingMode = false;
+  //   Serial.println("Estas en modo edición y sw = LOW");
+  // } else {
+  //   Serial.println("Estas en modo edición y sw = HIGH");
+  //   aState = digitalRead(outputA);
+  //   if (aState != aLastState) {     
+  //     if (digitalRead(outputB) != aState) { 
+  //       variableMostrarPantalla++;
+  //     } else {
+  //       variableMostrarPantalla--;
+  //     }
+  //     menu.update();
+  //     aLastState = aState;
+  //   }
+  // }
+}
+void fn_prueba1(){
+  menu.change_screen(2);
+  menu.set_focusedLine(3);
+  linea4_2.set_focusPosition(Position::CUSTOM, 10, 3);
+  led_seleccionado = 1;
+}
 
-        if (digitalRead(sw) == LOW) {
-          editingMode = false;
-          Serial.println("Estas en modo edición y sw = LOW");	
-        } else {
-          Serial.println("Estas en modo edición y sw = HIGTH");	
+void fn_variable() {
+  // editingMode = true;
+  // menu.change_screen(2);
+  // if(editingMode == true){
+  //     linea4_2.set_focusPosition(Position::CUSTOM, 10, 3);
+  // }else{
+  //     linea4_2.set_focusPosition(Position::LEFT);
+  // }
+
+
+  arrancar();
+
+
+  while(salida != 0)
+  {
+
+
+    switch(estado_actual){
+
+      case EST_LOGICA_EDITAR:
+        funcion_editando();
+      break;
+
+      case EST_APAGADO_EDITAR:
+        funcion_apagar();
+      break;
+
+      default:
+      break;
+
+    }
+    
+  }
+}
+//*******************************************************
+//FUNCIÓN PULSADOR SOSTENIDO START
+void arrancar()
+{
+  if (estado_actual == EST_ENCENDIDO_EDITAR)
+  {
+    estado = digitalRead(sw);
+    delay(1500);
+
+    estado_actual = EST_LOGICA_EDITAR;
+
+    salida = 1;
+
+
+    if((estado == LOW)&&(estadoAnterior == HIGH))
+    {
+      //estado_actual = EST_LOGICA_EDITAR;
+      //salida = 1;
+      //Serial.println("Salida: ");
+      //Serial.println(salida);   
+      //delay (120);            
+      
+      
+
+      // estadoAnterior = estado; 
+      // Serial.println("ESTADO HO **************************** ");
+      // Serial.println(estado); 
+      // Serial.println("estadoAnterior ****************************");
+      // Serial.println(estadoAnterior); 
+      // delay(10); 
+    }
+        
+    Serial.println("ESTADO HOOOOOOOO NOOO ");
+    Serial.println(estado); 
+    Serial.println("estadoAnterior NOOO ");
+    Serial.println(estadoAnterior); 
+
+  }  
+}
+
+//*******************************************************
+//FUNCIÓN PULSADOR SOSTENIDO START
+void funcion_editando()
+{
+    
+    if (estado_actual == EST_LOGICA_EDITAR)
+    { 
+        
+
+        Serial.println("Estas en modo edición y sw = HIGTH");	
           aState = digitalRead(outputA);
           if (aState != aLastState) {     
             if (digitalRead(outputB) != aState) { 
@@ -103,33 +253,51 @@ void handleVariableEditing() {
             menu.update();
             aLastState = aState;
           }
+        
+        Serial.println("EST_LOGICA_EDITAR");
+        Serial.print("Estad: ");
+        Serial.println(estado); 
+
+        Serial.println("estadoAnterior: ");
+        Serial.println(estadoAnterior); 
+
+        //editingMode = true;
+        
+        estado = digitalRead(sw);
+        
+        if((estado == LOW)&&(estadoAnterior == HIGH))
+        {
+            menu.change_screen(1);
+            menu.set_focusedLine(0);
+
+            estadoAnterior = estado;
+            estado_actual = EST_APAGADO_EDITAR;
+            delay(150);
         }
-
-
-
-  }else{
-    Serial.println("No deberías estar en modo edición********************************-------------------------------------------");	
-  }
-
-}
-void fn_prueba1(){
-  menu.change_screen(2);
-  menu.set_focusedLine(0);
-  led_seleccionado = 1;
+        
+        //delay(5000);
+        
+    }
 }
 
-void fn_variable() {
-  editingMode = true;
-  menu.change_screen(2);
-  if(editingMode == true){
-      linea4_2.set_focusPosition(Position::CUSTOM, 10, 3);
-  }else{
-      linea4_2.set_focusPosition(Position::LEFT);
-  }
-}
-void fn_cambio_variable() {
+//*******************************************************
+//FUNCIÓN PULSADOR SOSTENIDO START
+void funcion_apagar()
+{
+    if (estado_actual == EST_APAGADO_EDITAR)
+    {
+        Serial.println("EST_APAGADO_EDITAR apagado apagado ");
+        //delay(5000);
+        menu.change_screen(2);
+        menu.set_focusedLine(2);
+        estado_actual = EST_ENCENDIDO_EDITAR;
+        salida = 0;
+        estado=1;
+        estadoAnterior=1;
 
+    }
 }
+
 
 void fn_on(){
 }
@@ -139,7 +307,7 @@ void fn_off(){
 void selectOption(){
   if(digitalRead(sw) == LOW){
       menu.call_function(1);
-      delay(500);
+      delay(100);
   }
 }
 
