@@ -1,4 +1,4 @@
-//Estamos en dev dev
+//Estamos en 1era_RTC_Relay
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 #include <LiquidMenu.h>
