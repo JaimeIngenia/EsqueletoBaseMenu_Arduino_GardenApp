@@ -2,7 +2,16 @@
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 #include <LiquidMenu.h>
-
+//RTC_Relay Changes
+#include <RTClib.h>	
+# define RELE 24	
+RTC_DS3231 rtc;	
+RTC_DS3231 modulo_rtc;
+const byte analogPin = A1;
+unsigned short valorHora = 0;
+char bufferHora[9]; 
+float temperatura = 0.0; 
+//LCD
 LiquidCrystal_I2C lcd(0x27, 20, 4);
 //ENCODER
 #define outputA 6
@@ -25,8 +34,9 @@ int estado_actual=EST_ENCENDIDO_EDITAR;
 int estado_anterior=EST_APAGADO_EDITAR;
 
 LiquidLine linea1(1, 0, "    MAIN MENU    "); 
-LiquidLine linea2(1, 1,"1) Conf sensor R"); 
-LiquidScreen pantalla1(linea1,linea2);
+LiquidLine linea2(1, 1, "1) Conf sensor R"); 
+LiquidLine linea3(1, 2, "2) Ver Hora y temp"); 
+LiquidScreen pantalla1(linea1,linea2,linea3);
 
 LiquidLine linea1_2(1, 0, "Modifica los min:");
 LiquidLine linea2_2(1, 1, "Minutos:  ");
@@ -34,7 +44,12 @@ LiquidLine linea3_2(1, 2, "Atras");
 
 LiquidScreen pantalla2(linea1_2,linea2_2,linea3_2);
 
-LiquidMenu menu(lcd,pantalla1,pantalla2);
+LiquidLine linea1_3(1, 0, "Hora: ",bufferHora);
+LiquidLine linea2_3(1, 1, "Temp: ",temperatura);
+LiquidLine linea3_3(1, 2, "Atras");
+LiquidScreen pantalla3( linea1_3,linea2_3,linea3_3);
+
+LiquidMenu menu(lcd,pantalla1,pantalla2,pantalla3);
 
 void setup() {
 
@@ -47,8 +62,10 @@ void setup() {
 
   linea1.set_focusPosition(Position::LEFT); 
   linea2.set_focusPosition(Position::LEFT);
+  linea3.set_focusPosition(Position::LEFT);
   linea1.attach_function(1, fn_vacio); 
   linea2.attach_function(1, fn_sensor_riego); 
+  linea3.attach_function(1, fn_Hora_temperatura_RTC); 
   menu.add_screen(pantalla1);
 
   linea1_2.set_focusPosition(Position::LEFT); 
@@ -62,8 +79,19 @@ void setup() {
 
   menu.add_screen(pantalla2);
 
+  linea1_3.set_focusPosition(Position::LEFT); 
+  linea2_3.set_focusPosition(Position::LEFT); 
+  linea3_3.set_focusPosition(Position::LEFT); 
+
+  linea1_3.attach_function(1, fn_vacio); 
+  linea2_3.attach_function(1, fn_vacio);
+  linea3_3.attach_function(1, fn_atras);
+
+  menu.add_screen(pantalla3);
+
   pantalla1.set_displayLineCount(4);
   pantalla2.set_displayLineCount(4);
+  pantalla3.set_displayLineCount(4);
 
   menu.set_focusedLine(1);
   menu.update();
@@ -228,4 +256,14 @@ void fn_atras(){
   menu.set_focusedLine(1);
 }
 
+void fn_Hora_temperatura_RTC(){
+  DateTime ahora = modulo_rtc.now();
+  sprintf(bufferHora, "%02d:%02d", ahora.hour(), ahora.minute());
+  
+  temperatura = modulo_rtc.getTemperature();
+
+  menu.change_screen(3);
+  menu.set_focusedLine(2);
+  menu.update();
+}
 

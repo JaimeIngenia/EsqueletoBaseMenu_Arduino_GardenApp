@@ -18,18 +18,14 @@ RTC_DS3231 modulo_rtc;
 #define outputA 6
 #define outputB 7
 #define sw 4
-
 int aState;
 int aLastState; 
-
 //LEDS
 #define led1 8
 #define led2 9
 #define led3 10
 
 int contador = 0;
-int A_estado_actual;
-int A_ultimo_estado;
 int led_seleccionado = 0;
 
 LiquidLine linea1(1, 1, "Configurar Riego");
