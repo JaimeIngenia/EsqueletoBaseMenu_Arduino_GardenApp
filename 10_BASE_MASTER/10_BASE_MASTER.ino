@@ -34,20 +34,22 @@ int estado_actual=EST_ENCENDIDO_EDITAR;
 int estado_anterior=EST_APAGADO_EDITAR;
 
 LiquidLine linea1(1, 0, "    MAIN MENU    "); 
-LiquidLine linea2(1, 1, "1) Conf sensor R"); 
-LiquidLine linea3(1, 2, "2) Ver Hora y temp"); 
+LiquidLine linea2(1, 1, "1) Ver Hora y temp"); 
+LiquidLine linea3(1, 2, "2) Conf sensor R"); 
 LiquidScreen pantalla1(linea1,linea2,linea3);
-
-LiquidLine linea1_2(1, 0, "Modifica los min:");
-LiquidLine linea2_2(1, 1, "Minutos:  ");
-LiquidLine linea3_2(1, 2, "Atras");
-
-LiquidScreen pantalla2(linea1_2,linea2_2,linea3_2);
 
 LiquidLine linea1_3(1, 0, "Hora: ",bufferHora);
 LiquidLine linea2_3(1, 1, "Temp: ",temperatura);
 LiquidLine linea3_3(1, 2, "Atras");
 LiquidScreen pantalla3( linea1_3,linea2_3,linea3_3);
+
+LiquidLine linea1_2(1, 0, "Modifica los min:");
+LiquidLine linea2_2(1, 1, "Minutos:  ",variableMostrarPantalla);
+LiquidLine linea3_2(1, 2, "Atras");
+
+LiquidScreen pantalla2(linea1_2,linea2_2,linea3_2);
+
+
 
 LiquidMenu menu(lcd,pantalla1,pantalla2,pantalla3);
 
@@ -63,21 +65,12 @@ void setup() {
   linea1.set_focusPosition(Position::LEFT); 
   linea2.set_focusPosition(Position::LEFT);
   linea3.set_focusPosition(Position::LEFT);
+
   linea1.attach_function(1, fn_vacio); 
-  linea2.attach_function(1, fn_sensor_riego); 
-  linea3.attach_function(1, fn_Hora_temperatura_RTC); 
+  linea2.attach_function(1, fn_Hora_temperatura_RTC); 
+  linea3.attach_function(1, fn_sensor_riego); 
+
   menu.add_screen(pantalla1);
-
-  linea1_2.set_focusPosition(Position::LEFT); 
-  linea2_2.set_focusPosition(Position::LEFT); 
-  linea3_2.set_focusPosition(Position::LEFT); 
-
-  linea1_2.attach_function(1, fn_on); 
-  linea2_2.attach_function(1, fn_variable);
-  linea2_2.add_variable(variableMostrarPantalla);
-  linea3_2.attach_function(1, fn_atras);
-
-  menu.add_screen(pantalla2);
 
   linea1_3.set_focusPosition(Position::LEFT); 
   linea2_3.set_focusPosition(Position::LEFT); 
@@ -88,6 +81,18 @@ void setup() {
   linea3_3.attach_function(1, fn_atras);
 
   menu.add_screen(pantalla3);
+
+  linea1_2.set_focusPosition(Position::LEFT); 
+  linea2_2.set_focusPosition(Position::LEFT); 
+  linea3_2.set_focusPosition(Position::LEFT); 
+
+  linea1_2.attach_function(1, fn_on); 
+  linea2_2.attach_function(1, fn_variable);
+  linea3_2.attach_function(1, fn_atras);
+
+  menu.add_screen(pantalla2);
+
+
 
   pantalla1.set_displayLineCount(4);
   pantalla2.set_displayLineCount(4);
@@ -257,6 +262,7 @@ void fn_atras(){
 }
 
 void fn_Hora_temperatura_RTC(){
+  
   DateTime ahora = modulo_rtc.now();
   sprintf(bufferHora, "%02d:%02d", ahora.hour(), ahora.minute());
   
