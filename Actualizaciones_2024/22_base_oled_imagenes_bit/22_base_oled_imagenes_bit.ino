@@ -160,15 +160,33 @@ const unsigned char epd_bitmap_item_sel_background [] PROGMEM = {
 	0x1f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x80
 };
 
-// Array of all bitmaps for convenience. (Total bytes used to store images in PROGMEM = 432)
-const int epd_bitmap_allArray_LEN = 2;
-const unsigned char* epd_bitmap_allArray[2] = {
-	epd_bitmap_item_sel_background,
-	epd_bitmap_scrollbar_backgrounf
+
+// **************************************************************************************************************
+
+const int NUM_ITEMS = 8;
+
+char menu_items[NUM_ITEMS][20]={
+  {"3D Cube"},
+	{"Battery"},
+	{"Dashboard"},
+	{"Fireworks"},
+	{"GPS Speed"},
+	{"Big Knob"},
+	{"Park Sensor"},
+	{"Turbo Gauge"}
 };
 
 
+
 // **************************************************************************************************************
+
+int item_selected = 0; // En cual item del menú esta
+int item_sel_previous; 
+int item_sel_next; 
+
+
+// **************************************************************************************************************
+
 void setup() {
   u8g.setFont(u8g_font_tpssb);
   u8g.setColorIndex(1);
@@ -176,14 +194,55 @@ void setup() {
 }
 
 void loop() {
+
+  item_sel_previous = item_selected - 1 ;
+
+  if( item_sel_previous < 0 )
+  {
+    item_sel_previous = NUM_ITEMS - 1 ; // previous item be below fisrt = make it the last
+  }
+
+  if( item_sel_next >= NUM_ITEMS )
+  {
+    item_sel_next - 0 ; //next item would be after the last = make it the first
+  }
+
+
   u8g.firstPage();
 
   do{
 
       //u8g.drawBitmapP(4, 2, 128/8, 64, bitmap_icons[2]); 
-      u8g.drawBitmapP(4, 2, 16/8, 16, bitmap_icons[2]); // draw dashboard icon
-      u8g.drawBitmapP(4, 24, 16/8, 16, bitmap_icons[6]); // draw parking sensor icon
-      u8g.drawBitmapP(4, 46, 16/8, 16, bitmap_icons[7]); // draw turbo gauge icon
+     
+    
+      //*********************
+
+      //Previus Item
+      u8g.setFont(u8g_font_7x14);
+      // u8g.drawStr(26,15,"Dashboard");
+      // u8g.drawStr(26,15,menu_items[2]);
+      u8g.drawStr(26,15,menu_items[item_sel_previous]);
+      //u8g.drawBitmapP(4, 2, 16/8, 16, bitmap_icons[2]); // draw dashboard icon
+      u8g.drawBitmapP(4, 2, 16/8, 16, bitmap_icons[item_sel_previous]); // draw dashboard icon
+
+
+      //Selected Item
+      u8g.setFont(u8g_font_7x14);
+      // u8g.drawStr(26,37,"Park sensor");
+      // u8g.drawStr(26,37,menu_items[6]);
+      u8g.drawStr(26,37,menu_items[item_selected]);
+      // u8g.drawBitmapP(4, 24, 16/8, 16, bitmap_icons[6]); // draw parking sensor icon
+      u8g.drawBitmapP(4, 24, 16/8, 16, bitmap_icons[item_selected]); // draw parking sensor icon
+
+      //Next Item
+      u8g.setFont(u8g_font_7x14);
+      // u8g.drawStr(26,59,"Turbo Gauge");
+      // u8g.drawStr(26,59,menu_items[7]);
+      u8g.drawStr(26,59,menu_items[item_sel_next]);
+      // u8g.drawBitmapP(4, 46, 16/8, 16, bitmap_icons[7]); // draw turbo gauge icon
+      u8g.drawBitmapP(4, 46, 16/8, 16, bitmap_icons[item_sel_next]); // draw turbo gauge icon
+
+      //*********************
 
       u8g.drawBitmapP(0, 22, 128/8, 21, epd_bitmap_item_sel_background); // selected item background
       u8g.drawBitmapP(120, 0, 8/8, 64, epd_bitmap_scrollbar_backgrounf); // scrolled background

@@ -35,6 +35,8 @@ LiquidMenu menu(lcd,pantalla1,pantalla2);
 
 void setup() {
 
+  Serial.begin(9600);
+
   pinMode(led1,OUTPUT);
   pinMode(led2,OUTPUT);
   pinMode(led3,OUTPUT); 
@@ -89,8 +91,10 @@ void loop() {
     if (aState != aLastState){     
       if (digitalRead(outputB) != aState) { 
         menu.switch_focus(false);
+        Serial.print("Derecha");
       } else {
         menu.switch_focus(true);
+        Serial.print("Izquierda");
       }
       menu.update();
       aLastState = aState;
