@@ -198,6 +198,11 @@ int item_selected = 0; // En cual item del menú esta
 int item_sel_previous; 
 int item_sel_next; 
 
+int current_screen = 0;   // 0 = menu, 1 = screenshot, 2 = qr
+int demo_mode = 0; // when demo mode is set to 1, it automatically goes over all the screens, 0 = control menu with buttons
+int demo_mode_state = 0; // demo mode state = which screen and menu item to display
+int demo_mode_delay = 0; // demo mode delay = used to slow down the screen switching
+
 
 // **************************************************************************************************************
 
@@ -213,8 +218,10 @@ void setup() {
   
   //OLED
 
-  u8g.setFont(u8g_font_tpssb);
+  //u8g.setFont(u8g_font_tpssb);
   u8g.setColorIndex(1);
+  u8g2.begin();
+  u8g2.setBitmapMode(1);
 
 }
 
