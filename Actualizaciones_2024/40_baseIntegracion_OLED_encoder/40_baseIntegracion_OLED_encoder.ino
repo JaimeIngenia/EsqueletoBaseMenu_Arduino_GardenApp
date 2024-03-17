@@ -220,6 +220,13 @@ void setup() {
 
 void loop() {
 
+    
+  // ------------------------------------------------------------------------------------------------
+  //               ENCOER****************************************************************************
+  // ------------------------------------------------------------------------------------------------
+
+  checkEncoderAndButton();
+
   // ------------------------------------------------------------------------------------------------
   //               OLED******************************************************************************
   // ------------------------------------------------------------------------------------------------
@@ -230,6 +237,8 @@ void loop() {
   {
     item_sel_previous = NUM_ITEMS - 1 ; // previous item be below fisrt = make it the last
   }
+
+  item_sel_next = item_selected + 1;
 
   if( item_sel_next >= NUM_ITEMS )
   {
@@ -278,20 +287,42 @@ void loop() {
 
   } while( u8g.nextPage() );
 
-  
-  // ------------------------------------------------------------------------------------------------
-  //               ENCOER****************************************************************************
-  // ------------------------------------------------------------------------------------------------
 
+
+
+
+}
+
+// Función para verificar el encoder y el botón
+void checkEncoderAndButton() {
     currentStateCLK = digitalRead(CLK);
-    if (currentStateCLK != lastStateCLK  && currentStateCLK == 1){
 
+    // Si el último y el actual estado de CLK son diferentes, entonces ocurrió un pulso
+    // Reaccionar a solo 1 cambio de estado para evitar conteo doble.
+    if (currentStateCLK != lastStateCLK && currentStateCLK == 1) {
+        // Si el estado de DT es diferente que el estado de CLK entonces
+        // el encoder esta rotando en sentido contrario a las agujas del reloj, por lo que se decrementa
         if (digitalRead(DT) != currentStateCLK) {
-            counter --;
-            currentDir ="CCW";
+            counter--;
+            currentDir = "CCW";
+              item_selected = item_selected - 1 ;
+
+              if( item_selected < 0 )
+              {
+                item_selected = NUM_ITEMS - 1 ; 
+              }
+
         } else {
-            counter ++;
-            currentDir ="CW";
+            // El encodes esta rotando en sentido a las agujas del reloj, por lo que incrementa.
+            counter++;
+            currentDir = "CW";
+
+              item_selected = item_selected + 1 ;
+
+              if( item_selected >= NUM_ITEMS )
+              {
+                item_selected = 0 ; 
+              }
         }
 
         Serial.print("Direction: ");
@@ -300,17 +331,24 @@ void loop() {
         Serial.println(counter);
     }
 
+    // Recuerda el último estado de CLK
     lastStateCLK = currentStateCLK;
 
+    // Lee el estado del botón
     int btnState = digitalRead(SW);
 
+    // Si detectamos una señal baja (LOW), el botón fue presionado
     if (btnState == LOW) {
+        // Si pasaron 50ms desde el último pulso bajo, significa
+        // que el botón ha sido presionado, liberado y presionado nuevamente
         if (millis() - lastButtonPress > 50) {
             Serial.println("Button pressed!****************************************************");
         }
+
+        // Recordar el último evento de presión de botón.
         lastButtonPress = millis();
     }
+
+    // Poner un pequeño delay para ayudar a eliminar lecturas erróneas.
     delay(1);
-
-
 }
