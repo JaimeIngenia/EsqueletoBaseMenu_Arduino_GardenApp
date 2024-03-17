@@ -3,10 +3,24 @@
 #define DT 3
 #define SW 5
 
+//ESTADOS
+
+enum estados 
+{
+  EST_ENCENDIDO,
+  EST_APAGADO,
+  EST_DETECCION,
+  EST_CERRADO
+};
+
+// int estado_actual = EST_ENCENDIDO;
+int estado_actual = EST_DETECCION;
+int estado_anterior = EST_APAGADO;
+
 //SWITCH
 
-//const int switchPin = 8; 
-#define DEMO_PIN 8
+const int switchPin = 8; 
+//#define DEMO_PIN 8
 
 //ENCODER
 
@@ -215,8 +229,8 @@ void setup() {
 
   //SWITCH
 
-  //pinMode(switchPin, INPUT_PULLUP);
-  pinMode(DEMO_PIN, INPUT_PULLUP);
+  pinMode(switchPin, INPUT_PULLUP);
+  //pinMode(DEMO_PIN, INPUT_PULLUP);
 
   //ENCODER
 
@@ -241,13 +255,13 @@ void loop() {
   //               SWITCH****************************************************************************
   // ------------------------------------------------------------------------------------------------
 
-  switchEncendido();
+  
     
   // ------------------------------------------------------------------------------------------------
   //               ENCOER****************************************************************************
   // ------------------------------------------------------------------------------------------------
 
-  checkEncoderAndButton();
+  //checkEncoderAndButton();
 
   // ------------------------------------------------------------------------------------------------
   //               OLED******************************************************************************
@@ -311,110 +325,145 @@ void loop() {
 
   // } while( u8g.nextPage() );
 
-  if (demo_mode == 1) { // when demo mode is active, automatically switch between all the screens and menu items
-    demo_mode_delay++; // increase demo mode delay
-    if (demo_mode_delay > 15) { // after some time, switch to another screen - change this value to make it slower/faster
-      demo_mode_delay = 0;
-      demo_mode_state++; // increase counter
-      if (demo_mode_state >= NUM_ITEMS*3) {demo_mode_state=0;} // jump back to the first screen
-    }
+// ***********************************************************************************************************************************************************************************************
+// ***********************************************************************************************************************************************************************************************
+// ***********************************************************************************************************************************************************************************************
+// ***********************************************************************************************************************************************************************************************
+// ***********************************************************************************************************************************************************************************************
+// ***********************************************************************************************************************************************************************************************
+  // if (demo_mode == 1) { // when demo mode is active, automatically switch between all the screens and menu items
+  //   demo_mode_delay++; // increase demo mode delay
+  //   if (demo_mode_delay > 15) { // after some time, switch to another screen - change this value to make it slower/faster
+  //     demo_mode_delay = 0;
+  //     demo_mode_state++; // increase counter
+  //     if (demo_mode_state >= NUM_ITEMS*3) {demo_mode_state=0;} // jump back to the first screen
+  //   }
   
-    if (demo_mode_state % 3 == 0) {current_screen = 0; item_selected = demo_mode_state/3; } // menu screen
-    else if (demo_mode_state % 3 == 1) {current_screen = 1; item_selected = demo_mode_state/3;} // screenshots screen
-    else if (demo_mode_state % 3 == 2) {current_screen = 2; item_selected = demo_mode_state/3;} // qr codes screen
+  //   if (demo_mode_state % 3 == 0) {current_screen = 0; item_selected = demo_mode_state/3; } // menu screen
+  //   else if (demo_mode_state % 3 == 1) {current_screen = 1; item_selected = demo_mode_state/3;} // screenshots screen
+  //   else if (demo_mode_state % 3 == 2) {current_screen = 2; item_selected = demo_mode_state/3;} // qr codes screen
 
-  } // end demo mode section
-
-
-  if (current_screen == 0) { // MENU SCREEN
-
-      // up and down buttons only work for the menu screen
-      if ((digitalRead(BUTTON_UP_PIN) == LOW) && (button_up_clicked == 0)) { // up button clicked - jump to previous menu item
-        item_selected = item_selected - 1; // select previous item
-        button_up_clicked = 1; // set button to clicked to only perform the action once
-        if (item_selected < 0) { // if first item was selected, jump to last item
-          item_selected = NUM_ITEMS-1;
-        }
-      }
-      else if ((digitalRead(BUTTON_DOWN_PIN) == LOW) && (button_down_clicked == 0)) { // down button clicked - jump to next menu item
-        item_selected = item_selected + 1; // select next item
-        button_down_clicked = 1; // set button to clicked to only perform the action once
-        if (item_selected >= NUM_ITEMS) { // last item was selected, jump to first menu item
-          item_selected = 0;
-          }
-      } 
-
-      if ((digitalRead(BUTTON_UP_PIN) == HIGH) && (button_up_clicked == 1)) { // unclick 
-        button_up_clicked = 0;
-      }
-      if ((digitalRead(BUTTON_DOWN_PIN) == HIGH) && (button_down_clicked == 1)) { // unclick
-        button_down_clicked = 0;
-      }
-
-  }
+  // } // end demo mode section
 
 
-  if ((digitalRead(BUTTON_SELECT_PIN) == LOW) && (button_select_clicked == 0)) { // select button clicked, jump between screens
-     button_select_clicked = 1; // set button to clicked to only perform the action once
-     if (current_screen == 0) {current_screen = 1;} // menu items screen --> screenshots screen
-     else if (current_screen == 1) {current_screen = 2;} // screenshots screen --> qr codes screen
-     else {current_screen = 0;} // qr codes screen --> menu items screen
-  }
-  if ((digitalRead(BUTTON_SELECT_PIN) == HIGH) && (button_select_clicked == 1)) { // unclick 
-    button_select_clicked = 0;
-  }
+  // if (current_screen == 0) { // MENU SCREEN
 
-  // set correct values for the previous and next items
-  item_sel_previous = item_selected - 1;
-  if (item_sel_previous < 0) {item_sel_previous = NUM_ITEMS - 1;} // previous item would be below first = make it the last
-  item_sel_next = item_selected + 1;  
-  if (item_sel_next >= NUM_ITEMS) {item_sel_next = 0;} // next item would be after last = make it the first
+  //     // up and down buttons only work for the menu screen
+  //     if ((digitalRead(BUTTON_UP_PIN) == LOW) && (button_up_clicked == 0)) { // up button clicked - jump to previous menu item
+  //       item_selected = item_selected - 1; // select previous item
+  //       button_up_clicked = 1; // set button to clicked to only perform the action once
+  //       if (item_selected < 0) { // if first item was selected, jump to last item
+  //         item_selected = NUM_ITEMS-1;
+  //       }
+  //     }
+  //     else if ((digitalRead(BUTTON_DOWN_PIN) == LOW) && (button_down_clicked == 0)) { // down button clicked - jump to next menu item
+  //       item_selected = item_selected + 1; // select next item
+  //       button_down_clicked = 1; // set button to clicked to only perform the action once
+  //       if (item_selected >= NUM_ITEMS) { // last item was selected, jump to first menu item
+  //         item_selected = 0;
+  //         }
+  //     } 
+
+  //     if ((digitalRead(BUTTON_UP_PIN) == HIGH) && (button_up_clicked == 1)) { // unclick 
+  //       button_up_clicked = 0;
+  //     }
+  //     if ((digitalRead(BUTTON_DOWN_PIN) == HIGH) && (button_down_clicked == 1)) { // unclick
+  //       button_down_clicked = 0;
+  //     }
+
+  // }
+
+
+  // if ((digitalRead(BUTTON_SELECT_PIN) == LOW) && (button_select_clicked == 0)) { // select button clicked, jump between screens
+  //    button_select_clicked = 1; // set button to clicked to only perform the action once
+  //    if (current_screen == 0) {current_screen = 1;} // menu items screen --> screenshots screen
+  //    else if (current_screen == 1) {current_screen = 2;} // screenshots screen --> qr codes screen
+  //    else {current_screen = 0;} // qr codes screen --> menu items screen
+  // }
+  // if ((digitalRead(BUTTON_SELECT_PIN) == HIGH) && (button_select_clicked == 1)) { // unclick 
+  //   button_select_clicked = 0;
+  // }
+
+  // // set correct values for the previous and next items
+  // item_sel_previous = item_selected - 1;
+  // if (item_sel_previous < 0) {item_sel_previous = NUM_ITEMS - 1;} // previous item would be below first = make it the last
+  // item_sel_next = item_selected + 1;  
+  // if (item_sel_next >= NUM_ITEMS) {item_sel_next = 0;} // next item would be after last = make it the first
 
 
 
-  u8g2.clearBuffer();  // clear buffer for storing display content in RAM
+  // u8g2.clearBuffer();  // clear buffer for storing display content in RAM
 
-    if (current_screen == 0) { // MENU SCREEN
+  //   if (current_screen == 0) { // MENU SCREEN
 
-      // selected item background
-      u8g2.drawXBMP(0, 22, 128, 21, bitmap_item_sel_outline);
+  //     // selected item background
+  //     u8g2.drawXBMP(0, 22, 128, 21, bitmap_item_sel_outline);
 
-      // draw previous item as icon + label
-      u8g2.setFont(u8g_font_7x14);
-      u8g2.drawStr(25, 15, menu_items[item_sel_previous]); 
-      u8g2.drawXBMP( 4, 2, 16, 16, bitmap_icons[item_sel_previous]);          
+  //     // draw previous item as icon + label
+  //     u8g2.setFont(u8g_font_7x14);
+  //     u8g2.drawStr(25, 15, menu_items[item_sel_previous]); 
+  //     u8g2.drawXBMP( 4, 2, 16, 16, bitmap_icons[item_sel_previous]);          
 
-      // draw selected item as icon + label in bold font
-      u8g2.setFont(u8g_font_7x14B);    
-      u8g2.drawStr(25, 15+20+2, menu_items[item_selected]);   
-      u8g2.drawXBMP( 4, 24, 16, 16, bitmap_icons[item_selected]);     
+  //     // draw selected item as icon + label in bold font
+  //     u8g2.setFont(u8g_font_7x14B);    
+  //     u8g2.drawStr(25, 15+20+2, menu_items[item_selected]);   
+  //     u8g2.drawXBMP( 4, 24, 16, 16, bitmap_icons[item_selected]);     
 
-      // draw next item as icon + label
-      u8g2.setFont(u8g_font_7x14);     
-      u8g2.drawStr(25, 15+20+20+2+2, menu_items[item_sel_next]);   
-      u8g2.drawXBMP( 4, 46, 16, 16, bitmap_icons[item_sel_next]);  
+  //     // draw next item as icon + label
+  //     u8g2.setFont(u8g_font_7x14);     
+  //     u8g2.drawStr(25, 15+20+20+2+2, menu_items[item_sel_next]);   
+  //     u8g2.drawXBMP( 4, 46, 16, 16, bitmap_icons[item_sel_next]);  
 
-      // draw scrollbar background
-      u8g2.drawXBMP(128-8, 0, 8, 64, bitmap_scrollbar_background);
+  //     // draw scrollbar background
+  //     u8g2.drawXBMP(128-8, 0, 8, 64, bitmap_scrollbar_background);
 
-      // draw scrollbar handle
-      u8g2.drawBox(125, 64/NUM_ITEMS * item_selected, 3, 64/NUM_ITEMS); 
+  //     // draw scrollbar handle
+  //     u8g2.drawBox(125, 64/NUM_ITEMS * item_selected, 3, 64/NUM_ITEMS); 
 
-      // draw upir logo
-      u8g2.drawXBMP(128-16-4, 64-4, 16, 4, upir_logo);               
+  //     // draw upir logo
+  //     u8g2.drawXBMP(128-16-4, 64-4, 16, 4, upir_logo);               
 
-    } 
-    else if (current_screen == 1) { // SCREENSHOTS SCREEN
-        u8g2.drawXBMP( 0, 0, 128, 64, bitmap_screenshots[item_selected]); // draw screenshot
+  //   } 
+  //   else if (current_screen == 1) { // SCREENSHOTS SCREEN
+  //       u8g2.drawXBMP( 0, 0, 128, 64, bitmap_screenshots[item_selected]); // draw screenshot
+  //   }
+  //   else if (current_screen == 2) { // QR SCREEN
+  //       u8g2.drawXBMP( 0, 0, 128, 64, bitmap_qr_codes[item_selected]); // draw qr code screenshot
+  //   }   
+
+
+  // u8g2.sendBuffer(); // send buffer from RAM to display controller
+// ***********************************************************************************************************************************************************************************************
+// ***********************************************************************************************************************************************************************************************
+// ***********************************************************************************************************************************************************************************************
+// ***********************************************************************************************************************************************************************************************
+// ***********************************************************************************************************************************************************************************************
+// ***********************************************************************************************************************************************************************************************
+  arrancar();
+
+  //demo_mode = 0; // disable demo mode
+  //estado_actual = EST_ENCENDIDO;
+
+
+
+  while (digitalRead(switchPin) == LOW )
+  {
+    switch(estado_actual)
+    {
+      case EST_DETECCION: 
+        encender_led();
+      break;
+
+      case EST_CERRADO:
+        cerrar();
+      break;
+
+      default:
+      break;
+
+      
     }
-    else if (current_screen == 2) { // QR SCREEN
-        u8g2.drawXBMP( 0, 0, 128, 64, bitmap_qr_codes[item_selected]); // draw qr code screenshot
-    }   
-
-
-  u8g2.sendBuffer(); // send buffer from RAM to display controller
-
-
+  }
 
 }
 
@@ -480,26 +529,68 @@ void checkEncoderAndButton() {
     // Poner un pequeño delay para ayudar a eliminar lecturas erróneas.
     delay(1);
 }
+
+
 // ------------------------------------------------------------------------------------------------
-//               SWITCH****************************************************************************
+//               ESTADOS***************************************************************************
 // ------------------------------------------------------------------------------------------------
 
-void switchEncendido(){
+//**************************************************************
+//FUNCIÓN PULSADOR SOSTENIDO START
 
-  // int switchState = digitalRead(switchPin);
-  // // Invertimos el estado porque la resistencia pull-up activa el pin en HIGH cuando el switch está en la posición "off"
-  // switchState = !switchState;
-  // // Enviamos el estado del switch al monitor en serie
-  // Serial.println(switchState);
-  // delay(100);
+void arrancar(){
 
-  if (digitalRead(DEMO_PIN) == LOW) {
-    demo_mode = 1; // enable demo mode  
+
+
+    Serial.println(" ------------------------------------------------------------------------------------------------");
+    Serial.println(" ------------------------------------------------------------------------------------------------");
+    Serial.println(" ------------------------------------------------------------------------------------------------");
+    Serial.println("               Bienvenido************************************************************************");
+    Serial.println(" ------------------------------------------------------------------------------------------------");
+    Serial.println(" ------------------------------------------------------------------------------------------------");
+    Serial.println(" ------------------------------------------------------------------------------------------------");
+    Serial.println("Presione el switch para iniciar el programa .....");
+
+    // ------------------------------------------------------------------------------------------------
+    //               SWITCH****************************************************************************
+    // ------------------------------------------------------------------------------------------------
+
+
+
+
+    
+
+}
+
+
+//**************************************************************
+//FUNCIÓN ENCENDER LED
+
+void encender_led(){
+
+  if (estado_actual == EST_DETECCION){
+
+    Serial.println("ESTADO DETECCIÓN----------------------------------------------------------------------------------------------------------------------------------------");
+    delay(1000);
+
+    estado_actual = EST_CERRADO;
+
   }
-  else  {
-    demo_mode = 0; // disable demo mode
+
+}
+
+//**************************************************************
+//FUNCIÓN CERRAR
+
+void cerrar(){
+
+  if(estado_actual == EST_CERRADO){
+
+    Serial.println("ESTADO CERRADO");
+    delay(1000);
+
+    estado_actual = EST_DETECCION;
+
   }
-  Serial.println(demo_mode);
-  delay(100);
 
 }
