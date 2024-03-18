@@ -1661,8 +1661,8 @@ void setup() {
 
 void loop() {
 
-//Serial.println(programMemoryUsed());
-Serial.println(freeMemory());
+  //Serial.println(programMemoryUsed());
+  Serial.println(freeMemory());
 
   arrancar();
 

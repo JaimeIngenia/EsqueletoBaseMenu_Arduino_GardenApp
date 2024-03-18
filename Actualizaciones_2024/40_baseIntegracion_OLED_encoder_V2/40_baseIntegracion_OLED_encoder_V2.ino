@@ -3,7 +3,7 @@
 #define CLK 2 //A
 #define DT 3 // b
 #define SW 5
-
+#include <MemoryFree.h>
 //ESTADOS
 
 enum estados 
@@ -1671,6 +1671,8 @@ void setup() {
 }
 
 void loop() {
+
+  Serial.println(freeMemory());
 
   arrancar();
 
