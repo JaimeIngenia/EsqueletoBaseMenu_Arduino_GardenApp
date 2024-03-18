@@ -9,8 +9,8 @@
 
 */
 
-int A = 2; 			//variable A a pin digital 2 (DT en modulo)
-int B = 4;  			//variable B a pin digital 4 (CLK en modulo)
+int A = 2; //CLK			//variable A a pin digital 2 (DT en modulo)
+int B = 3; //DT		//variable B a pin digital 4 (CLK en modulo)
 
 int ANTERIOR = 50;		// almacena valor anterior de la variable POSICION
 
