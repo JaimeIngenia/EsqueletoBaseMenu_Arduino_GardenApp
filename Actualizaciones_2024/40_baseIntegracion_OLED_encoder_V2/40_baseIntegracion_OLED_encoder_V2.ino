@@ -26,6 +26,7 @@ const int switchPin = 8;
 //#define DEMO_PIN 8
 
 //ENCODER
+bool buttonPressed = false;
 
 int counter = 0;
 int currentStateCLK;
@@ -1648,11 +1649,9 @@ char menu_items [NUM_ITEMS] [MAX_ITEM_LENGTH] = {  // array with item names
 
 void setup() {
   Serial.begin(9600);
-
   //SWITCH
 
   pinMode(switchPin, INPUT_PULLUP);
-  //pinMode(DEMO_PIN, INPUT_PULLUP);
 
   //ENCODER
 
@@ -1662,11 +1661,9 @@ void setup() {
   lastStateCLK = digitalRead(CLK);
 
   attachInterrupt(digitalPinToInterrupt(CLK), encoder, LOW);// interrupcion sobre pin A con
-  
+  //attachInterrupt(digitalPinToInterrupt(SW), buttonInterrupt, FALLING);
   //OLED
 
-  // u8g.setFont(u8g_font_tpssb);
-  // u8g.setColorIndex(1);
   u8g2.setColorIndex(1);  // set the color to white
   u8g2.begin();
   u8g2.setBitmapMode(1);
@@ -1675,395 +1672,87 @@ void setup() {
 
 void loop() {
 
-
-//Serial.println("Vida!!");
-
-    // if (item_selected != item_selected_anterior) {	// si el valor de POSICION es distinto de ANTERIOR
-    //   Serial.println(item_selected);	// imprime valor de POSICION
-    // item_selected_anterior = item_selected ;	// asigna a ANTERIOR el valor actualizado de POSICION
-
-
-              // currentStateCLK = digitalRead(CLK);
-              // if (currentStateCLK != lastStateCLK && currentStateCLK == 1) {
-              //     if (digitalRead(DT) != currentStateCLK) {
-              //             //estado_actual = EST_RIEGO;//Ayudame aqui chat gpt, necesito incrementar una variable maximo hasta 8 y depende de ese numero cambiar el estado en el swith case
-              //             item_selected = item_selected - 1;
-              //                if (item_selected < 0) { // if first item was selected, jump to last item
-              //                   item_selected = 4-1;
-              //                 }
-
-                            
-       
-              //     } else {
-
-              //         //estado_actual = EST_HUMEDAD;//Ayudame aqui chat gpt, necesito incrementar una variable maximo hasta 8 y depende de ese numero cambiar el estado en el swith case
-              //         item_selected = item_selected + 1;
-              //          if (item_selected >= 4) { // last item was selected, jump to first menu item
-              //           item_selected = 0;
-              //           }
-              //     }
-              // }
-
-              // lastStateCLK = currentStateCLK;
-
-
-              //delay(10);
-
-              //Serial.println(item_selected);
-  //int estado_actual = EST_DETECCION;
-  
-// ***************************************************************************************************************
-  // currentStateCLK = digitalRead(CLK);
-  //   if (currentStateCLK != lastStateCLK && currentStateCLK == 1) {
-
-  //       if (digitalRead(DT) != currentStateCLK) {
-  //           counter--;
-
-  //               item_selected = item_selected + 1; // select next item
-  //               //button_down_clicked = 1; // set button to clicked to only perform the action once
-  //               if (item_selected >= NUM_ITEMS) { // last item was selected, jump to first menu item
-  //                 item_selected = 0;
-  //               }
-  //               //u8g2.drawStr(26,15,"Menos");
-                
-  //       } else {
-  //           counter++;
-  //               item_selected = item_selected - 1; // select previous item
-  //               button_up_clicked = 1; // set button to clicked to only perform the action once
-  //               if (item_selected < 0) { // if first item was selected, jump to last item
-  //                 item_selected = NUM_ITEMS-1;
-  //               }
-  //               //u8g2.drawStr(26,15,"mas");
-  //       }
-  //   }
-
-  //   lastStateCLK = currentStateCLK;
-// ***************************************************************************************************************
-
-//*************************************************************************************************************************
-//                                                PRESS BUTTON ENCODER
-//*************************************************************************************************************************
-
-  checkEncoderButton();
-
-
   arrancar();
 
   while (digitalRead(switchPin) == LOW )
   {
-
-    // if (POSICION != ANTERIOR) {	// si el valor de POSICION es distinto de ANTERIOR
-    //   Serial.println(POSICION);	// imprime valor de POSICION
-    //   //Serial.println("Vida!!");
-    //   ANTERIOR = POSICION ;	// asigna a ANTERIOR el valor actualizado de POSICION
-    // }
-    if (item_selected != item_selected_anterior) {	// si el valor de POSICION es distinto de ANTERIOR
-      Serial.println(item_selected);	// imprime valor de POSICION
-      //Serial.println("Vida!!");
-      item_selected_anterior = item_selected ;	// asigna a ANTERIOR el valor actualizado de POSICION
+    if (item_selected != item_selected_anterior) {	
+      Serial.println(item_selected);	
+      item_selected_anterior = item_selected ;
     }
 
+    //checkEncoderButton();
 
+    switch(estado_actual)
+    {
+      case EST_DETECCION: 
+        encender_led();
+      break;
 
+      case EST_RIEGO: 
+        configuracion_riego();
+      break;
 
-    //*************************************************************************************************************************
-    //                                                  CODIGO DEL HOMBRE
-    //*************************************************************************************************************************
+      case EST_HUMEDAD: 
+        configuracion_humedad();
+      break;
 
+      case EST_CERRADO:
+        cerrar();
+      break;
 
-    
-    // set correct values for the previous and next items
-    // item_sel_previous = item_selected - 1;
-    // if (item_sel_previous < 0) {item_sel_previous = NUM_ITEMS - 1;} // previous item would be below first = make it the last
-    // item_sel_next = item_selected + 1;  
-    // if (item_sel_next >= NUM_ITEMS) {item_sel_next = 0;} // next item would be after last = make it the first
+      default:
+      break;
+    }
 
-    
-
-    // if (current_screen == 0) { // MENU SCREEN
-
-    //   u8g2.clearBuffer();  // clear buffer for storing display content in RAM
-
-    //   // selected item background
-    //   u8g2.drawXBMP(0, 22, 128, 21, bitmap_item_sel_outline);
-
-    //   // draw previous item as icon + label
-    //   u8g2.setFont(u8g_font_7x14);
-    //   u8g2.drawStr(25, 15, menu_items[item_sel_previous]); 
-    //   u8g2.drawXBMP( 4, 2, 16, 16, bitmap_icons[item_sel_previous]);          
-
-    //   // draw selected item as icon + label in bold font
-    //   u8g2.setFont(u8g_font_7x14B);    
-    //   u8g2.drawStr(25, 15+20+2, menu_items[item_selected]);   
-    //   u8g2.drawXBMP( 4, 24, 16, 16, bitmap_icons[item_selected]);     
-
-    //   // draw next item as icon + label
-    //   u8g2.setFont(u8g_font_7x14);     
-    //   u8g2.drawStr(25, 15+20+20+2+2, menu_items[item_sel_next]);   
-    //   u8g2.drawXBMP( 4, 46, 16, 16, bitmap_icons[item_sel_next]);  
-
-    //   // draw scrollbar background
-    //   u8g2.drawXBMP(128-8, 0, 8, 64, bitmap_scrollbar_background);
-
-    //   // draw scrollbar handle
-    //   u8g2.drawBox(125, 64/NUM_ITEMS * item_selected, 3, 64/NUM_ITEMS); 
-
-    //   // draw upir logo
-    //   u8g2.drawXBMP(128-16-4, 64-4, 16, 4, upir_logo);               
-
-    // } 
-    // else if (current_screen == 1) { // SCREENSHOTS SCREEN
-    //     u8g2.drawXBMP( 0, 0, 128, 64, bitmap_screenshots[item_selected]); // draw screenshot
-    // }
-    // else if (current_screen == 2) { // QR SCREEN
-    //     u8g2.drawXBMP( 0, 0, 128, 64, bitmap_qr_codes[item_selected]); // draw qr code screenshot
-    // }   
-
-
-    // send buffer from RAM to display controller
-    //u8g2.sendBuffer();
-
-    //*************************************************************************************************************************
-    //                                                       SWITCH
-    //*************************************************************************************************************************
-    u8g2.clearBuffer();
-    u8g2.drawXBMP( 0, 0, 128, 64, bitmap_screenshots[3]); 
-    u8g2.sendBuffer();
-
-
-    // switch(item_selected)
-    // {
-    //   case 0: 
-    //     encender_led();
-    //   break;
-
-    //   case 1: 
-    //     configuracion_riego();
-    //   break;
-
-    //   case 2: 
-    //     configuracion_humedad();
-    //   break;
-
-    //   case 3:
-    //     cerrar();
-    //   break;
-
-    //   default:
-    //   break;
-    // }
   }
  
 }
 
-// ------------------------------------------------------------------------------------------------
-//               ENCOER****************************************************************************
-// ------------------------------------------------------------------------------------------------
-
-void checkEncoderAndButton() {
-    currentStateCLK = digitalRead(CLK);
-
-    // Si el último y el actual estado de CLK son diferentes, entonces ocurrió un pulso
-    // Reaccionar a solo 1 cambio de estado para evitar conteo doble.
-    if (currentStateCLK != lastStateCLK && currentStateCLK == 1) {
-        // Si el estado de DT es diferente que el estado de CLK entonces
-        // el encoder esta rotando en sentido contrario a las agujas del reloj, por lo que se decrementa
-        if (digitalRead(DT) != currentStateCLK) {
-            counter--;
-            //currentDir = "CCW";
-              // item_selected = item_selected - 1 ;
-
-              // if( item_selected < 0 )
-              // {
-              //   item_selected = NUM_ITEMS - 1 ; 
-              // }
-                if (current_screen == 0) {current_screen = 1;} // menu items screen --> screenshots screen
-                else if (current_screen == 1) {current_screen = 2;} // screenshots screen --> qr codes screen
-                else {current_screen = 0;}
-
-        } else {
-            // El encodes esta rotando en sentido a las agujas del reloj, por lo que incrementa.
-            counter++;
-            //currentDir = "CW";
-
-              item_selected = item_selected + 1 ;
-
-              if( item_selected >= NUM_ITEMS )
-              {
-                item_selected = 0 ; 
-              }
-        }
-
-        //Serial.print("Direction: ");
-        //Serial.print(currentDir);
-        //Serial.print("  | Counter: ");
-        //Serial.println(counter);
-    }
-
-    // Recuerda el último estado de CLK
-    lastStateCLK = currentStateCLK;
-
-    // Lee el estado del botón
-    int btnState = digitalRead(SW);
-
-    // Si detectamos una señal baja (LOW), el botón fue presionado
-    if (btnState == LOW) {
-        // Si pasaron 50ms desde el último pulso bajo, significa
-        // que el botón ha sido presionado, liberado y presionado nuevamente
-        if (millis() - lastButtonPress > 50) {
-            //Serial.println("Button pressed!****************************************************");
-        }
-
-        // Recordar el último evento de presión de botón.
-        lastButtonPress = millis();
-    }
-
-    // Poner un pequeño delay para ayudar a eliminar lecturas erróneas.
-    delay(1);
-}
 
 
-
-// ------------------------------------------------------------------------------------------------
-//                                 ENCOER PARA PANTALLA Current_Screen
-// ------------------------------------------------------------------------------------------------
-
-void checkEncoderPantalla_Current_Screen() {
-    currentStateCLK = digitalRead(CLK);
-
-    if (currentStateCLK != lastStateCLK && currentStateCLK == 1) {
-
-        if (digitalRead(DT) != currentStateCLK) {
-            counter--;
-            //currentDir = "CCW";
-              // item_selected = item_selected - 1 ;
-
-              // if( item_selected < 0 )
-              // {
-              //   item_selected = NUM_ITEMS - 1 ; 
-              // }
-                item_selected = item_selected + 1; // select next item
-                button_down_clicked = 1; // set button to clicked to only perform the action once
-                if (item_selected >= NUM_ITEMS) { // last item was selected, jump to first menu item
-                  item_selected = 0;
-                }
-                
-
-        } else {
-            // El encodes esta rotando en sentido a las agujas del reloj, por lo que incrementa.
-            counter++;
-            //currentDir = "CW";
-
-              // item_selected = item_selected + 1 ;
-
-              // if( item_selected >= NUM_ITEMS )
-              // {
-              //   item_selected = 0 ; 
-              // }
-                item_selected = item_selected - 1; // select previous item
-                button_up_clicked = 1; // set button to clicked to only perform the action once
-                if (item_selected < 0) { // if first item was selected, jump to last item
-                  item_selected = NUM_ITEMS-1;
-                }
-        }
-
-
-    }
-
-    // Recuerda el último estado de CLK
-    lastStateCLK = currentStateCLK;
-
-   
-    // Poner un pequeño delay para ayudar a eliminar lecturas erróneas.
-    delay(1);
-}
 
 
 // ------------------------------------------------------------------------------------------------
 //                                          ENCOER BUTTON PRESS
 // ------------------------------------------------------------------------------------------------
 
-void checkEncoderButton() {
-   
+// void checkEncoderButton() {
+//     int btnState = digitalRead(SW);
+//     if (btnState == LOW) {
+//         if (millis() - lastButtonPress > 50) {
+//               Serial.println("Button pressed!****************************************************");
+//               // if (current_screen == 0) {current_screen = 1;} // menu items screen --> screenshots screen
+//               // else if (current_screen == 1) {current_screen = 2;} // screenshots screen --> qr codes screen
+//               // else {current_screen = 0;} // qr codes screen --> menu items screen
+//         }
+//         lastButtonPress = millis();
+//     }
+//     delay(1);
+// }
 
-    // Lee el estado del botón
+void checkEncoderButton() {
     int btnState = digitalRead(SW);
 
-    // Si detectamos una señal baja (LOW), el botón fue presionado
     if (btnState == LOW) {
-        // Si pasaron 50ms desde el último pulso bajo, significa
-        // que el botón ha sido presionado, liberado y presionado nuevamente
-        if (millis() - lastButtonPress > 50) {
-            //Serial.println("Button pressed!****************************************************");
-              if (current_screen == 0) {current_screen = 1;} // menu items screen --> screenshots screen
-              else if (current_screen == 1) {current_screen = 2;} // screenshots screen --> qr codes screen
-              else {current_screen = 0;} // qr codes screen --> menu items screen
+        if (!buttonPressed && (millis() - lastButtonPress > 50)) {
+            buttonPressed = true;
+            Serial.println("Button pressed!****************************************************");
         }
-
-        // Recordar el último evento de presión de botón.
-        lastButtonPress = millis();
+    } else {
+        buttonPressed = false;
     }
 
-    // Poner un pequeño delay para ayudar a eliminar lecturas erróneas.
-    delay(1);
+    lastButtonPress = millis();
 }
-
-
-
-
-
-
-
-
-
-// ------------------------------------------------------------------------------------------------
-//               ESTADOS***************************************************************************
-// ------------------------------------------------------------------------------------------------
-
-
-
-
-
-
-
-
 
 
 //**************************************************************
 //             FUNCIÓN PULSADOR SOSTENIDO START
 //**************************************************************
 void arrancar(){
-    // set correct values for the previous and next items
-  item_sel_previous = item_selected - 1;
-  if (item_sel_previous < 0) {item_sel_previous = NUM_ITEMS - 1;} // previous item would be below first = make it the last
-  item_sel_next = item_selected + 1;  
-  if (item_sel_next >= NUM_ITEMS) {item_sel_next = 0;} // next item would be after last = make it the first
     u8g2.clearBuffer(); 
-    u8g2.drawXBMP(0, 22, 128, 21, bitmap_item_sel_outline);
-          // draw previous item as icon + label
-      u8g2.setFont(u8g_font_7x14);
-      u8g2.drawStr(25, 15, menu_items[item_sel_previous]); 
-      u8g2.drawXBMP( 4, 2, 16, 16, bitmap_icons[item_sel_previous]);          
-
-      // draw selected item as icon + label in bold font
-      u8g2.setFont(u8g_font_7x14B);    
-      u8g2.drawStr(25, 15+20+2, menu_items[item_selected]);   
-      u8g2.drawXBMP( 4, 24, 16, 16, bitmap_icons[item_selected]);     
-
-      // draw next item as icon + label
-      u8g2.setFont(u8g_font_7x14);     
-      u8g2.drawStr(25, 15+20+20+2+2, menu_items[item_sel_next]);   
-      u8g2.drawXBMP( 4, 46, 16, 16, bitmap_icons[item_sel_next]);  
-
-      // draw scrollbar background
-      u8g2.drawXBMP(128-8, 0, 8, 64, bitmap_scrollbar_background);
-
-      // draw scrollbar handle
-      u8g2.drawBox(125, 64/NUM_ITEMS * item_selected, 3, 64/NUM_ITEMS); 
-
-      // draw upir logo
-      u8g2.drawXBMP(128-16-4, 64-4, 16, 4, upir_logo);   
-    //u8g2.drawXBMP( 0, 0, 128, 64, bitmap_screenshots[item_selected]); // draw screenshot
+    u8g2.drawXBMP( 0, 0, 128, 64, bitmap_screenshots[0]); // draw screenshot
     u8g2.sendBuffer();
 }
 
@@ -2074,27 +1763,56 @@ void arrancar(){
 
 void encender_led(){
 
+  if (estado_actual == EST_DETECCION){
 
-  // if (estado_actual == EST_DETECCION){
+    // set correct values for the previous and next items
+    item_sel_previous = item_selected - 1;
+    if (item_sel_previous < 0) {item_sel_previous = NUM_ITEMS - 1;} // previous item would be below first = make it the last
+    item_sel_next = item_selected + 1;  
+    if (item_sel_next >= NUM_ITEMS) {item_sel_next = 0;} // next item would be after last = make it the first
+      
+      
+    u8g2.clearBuffer();
 
-  //   //Serial.println("ESTADO DETECCIÓN----------------------------------------------------------------------------------------------------------------------------------------");
-  //   //u8g2.drawStr(26,15,"EST_DETECCION");
-  //   u8g2.clearBuffer(); 
-  //   u8g2.drawXBMP( 0, 0, 128, 64, bitmap_screenshots[2]);
-  //   //u8g2.drawStr(26,15,"EST_DETE");
-  //   //u8g2.sendBuffer();
-  //    //u8g2.drawStr(26,15,"EST_DETE");
+    if (current_screen == 0) { // MENU SCREEN 
+      u8g2.drawXBMP(0, 22, 128, 21, bitmap_item_sel_outline);
+            // draw previous item as icon + label
+        u8g2.setFont(u8g_font_7x14);
+        u8g2.drawStr(25, 15, menu_items[item_sel_previous]); 
+        u8g2.drawXBMP( 4, 2, 16, 16, bitmap_icons[item_sel_previous]);          
 
-  //    u8g2.sendBuffer();
-  //    delay(1000);
+        // draw selected item as icon + label in bold font
+        u8g2.setFont(u8g_font_7x14B);    
+        u8g2.drawStr(25, 15+20+2, menu_items[item_selected]);   
+        u8g2.drawXBMP( 4, 24, 16, 16, bitmap_icons[item_selected]);     
 
-  //   estado_actual = EST_RIEGO;
+        // draw next item as icon + label
+        u8g2.setFont(u8g_font_7x14);     
+        u8g2.drawStr(25, 15+20+20+2+2, menu_items[item_sel_next]);   
+        u8g2.drawXBMP( 4, 46, 16, 16, bitmap_icons[item_sel_next]);  
 
-  // }
+        // draw scrollbar background
+        u8g2.drawXBMP(128-8, 0, 8, 64, bitmap_scrollbar_background);
 
-    u8g2.clearBuffer(); 
-    u8g2.drawXBMP( 0, 0, 128, 64, bitmap_screenshots[0]);
+        // draw scrollbar handle
+        u8g2.drawBox(125, 64/NUM_ITEMS * item_selected, 3, 64/NUM_ITEMS); 
+
+        // draw upir logo
+        u8g2.drawXBMP(128-16-4, 64-4, 16, 4, upir_logo);  
+       } 
+      else  if (current_screen == 1) { // SCREENSHOTS SCREEN
+       u8g2.drawXBMP( 0, 0, 128, 64, bitmap_screenshots[item_selected]); // draw screenshot
+       }
+       else if (current_screen == 2) { // QR SCREEN
+           u8g2.drawXBMP( 0, 0, 128, 64, bitmap_qr_codes[item_selected]); // draw qr code screenshot
+       }   
+ 
     u8g2.sendBuffer();
+    //estado_actual = EST_RIEGO;
+
+  }
+
+
 
 }
 
@@ -2165,33 +1883,50 @@ void cerrar(){
 
 }
 
-void encoder()  {
-  static unsigned long ultimaInterrupcion = 0;	// variable static con ultimo valor de
-						// tiempo de interrupcion
-  unsigned long tiempoInterrupcion = millis();	// variable almacena valor de func. millis
+//**************************************************************
+//                     FUNCIÓN ENCODER
+//**************************************************************
 
-  if (tiempoInterrupcion - ultimaInterrupcion > 5) {	// rutina antirebote desestima
-							// pulsos menores a 5 mseg.
-    if (digitalRead(DT) == HIGH)			// si B es HIGH, sentido horario
+
+void encoder()  {
+  static unsigned long ultimaInterrupcion = 0;
+						// tiempo de interrupcion
+  unsigned long tiempoInterrupcion = millis();
+
+  if (tiempoInterrupcion - ultimaInterrupcion > 5) {
+				
+    if (digitalRead(DT) == HIGH)
     {
-      POSICION++ ;				// incrementa POSICION en 1
+      POSICION++ ;
       item_selected++ ;
-      if (item_selected >= NUM_ITEMS) { // last item was selected, jump to first menu item
+      if (item_selected >= NUM_ITEMS) { 
         item_selected = 0;
       }
       
     }
-    else {					// si B es LOW, senti anti horario
-      POSICION-- ;				// decrementa POSICION en 1
+    else {				
+      POSICION-- ;			
       item_selected-- ;
-      if (item_selected < 0) { // if first item was selected, jump to last item
+      if (item_selected < 0) { 
         item_selected = NUM_ITEMS-1;
       }
       
     }
 
-    POSICION = min(100, max(0, POSICION));	// establece limite inferior de 0 y
-						// superior de 100 para POSICION
-    ultimaInterrupcion = tiempoInterrupcion;	// guarda valor actualizado del tiempo
-  }						// de la interrupcion en variable static
+    POSICION = min(100, max(0, POSICION));
+    ultimaInterrupcion = tiempoInterrupcion;
+  }						
+}
+
+//**************************************************************
+//                     FUNCIÓN BOTON ENCODER
+//**************************************************************
+
+void buttonInterrupt() {
+
+  int btnState = digitalRead(SW);
+
+  if (btnState == LOW) {
+    Serial.println("Button pressed!");
+  }
 }

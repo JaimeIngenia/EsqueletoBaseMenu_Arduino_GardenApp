@@ -1,5 +1,8 @@
 #include "U8g2lib.h"
 
+volatile int POSICION = 1;	// variable POSICION con valor inicial de 50 y definida
+int ANTERIOR = 1;	
+
 U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0); // [full framebuffer, size = 1024 bytes]
 
 
@@ -1638,6 +1641,7 @@ void setup() {
   pinMode(SW, INPUT_PULLUP);
   //Serial.begin(9600);
   lastStateCLK = digitalRead(CLK);
+  //attachInterrupt(digitalPinToInterrupt(CLK), encoder, LOW);//
 
   pinMode(DEMO_PIN, INPUT_PULLUP);
   
@@ -1789,4 +1793,37 @@ void loop() {
   u8g2.sendBuffer(); // send buffer from RAM to display controller
 
 
+}
+
+void encoder()  {
+
+
+  static unsigned long ultimaInterrupcion = 0;	// variable static con ultimo valor de
+						// tiempo de interrupcion
+  unsigned long tiempoInterrupcion = millis();	// variable almacena valor de func. millis
+
+  if (tiempoInterrupcion - ultimaInterrupcion > 5) {	// rutina antirebote desestima
+							// pulsos menores a 5 mseg.
+    if (digitalRead(DT) == HIGH)			// si B es HIGH, sentido horario
+    {
+      POSICION++ ;				// incrementa POSICION en 1
+      item_selected++ ;
+      if (item_selected >= NUM_ITEMS) { // last item was selected, jump to first menu item
+        item_selected = 0;
+      }
+      
+    }
+    else {					// si B es LOW, senti anti horario
+      POSICION-- ;				// decrementa POSICION en 1
+      item_selected-- ;
+      if (item_selected < 0) { // if first item was selected, jump to last item
+        item_selected = NUM_ITEMS-1;
+      }
+      
+    }
+
+    POSICION = min(100, max(0, POSICION));	// establece limite inferior de 0 y
+						// superior de 100 para POSICION
+    ultimaInterrupcion = tiempoInterrupcion;	// guarda valor actualizado del tiempo
+  }						// de la interrupcion en variable static
 }
