@@ -923,7 +923,6 @@ void setup() {
 
 void loop() {
 
-  //Serial.println(programMemoryUsed());
   Serial.println(freeMemory());
 
   arrancar();
@@ -932,12 +931,18 @@ void loop() {
   {
 
 
-    //***********************************************************************************************
-    // ------------------------------------------------------------------------------------------------
-
-  //                                          ENCOER BUTTON PRESS
-                                            //checkEncoderButton();
+  //***********************************************************************************************
   // ------------------------------------------------------------------------------------------------
+  //                                          ENCOER BUTTON PRESS
+  checkEncoderButton();
+
+  // Serial.print("current_screen: ");
+  // Serial.println(current_screen);
+  // ------------------------------------------------------------------------------------------------
+
+
+
+
  if (item_selected != item_selected_anterior) {	
       Serial.println(item_selected);	
       item_selected_anterior = item_selected ;}
@@ -976,54 +981,28 @@ void loop() {
 
         // draw upir logo
         u8g2.drawXBMP(128-16-4, 64-4, 16, 4, upir_logo);  
-       } 
-      else  if (current_screen == 2){
-            
-            if (item_selected == 0) { // SCREENSHOTS SCREEN
-                  u8g2.setFont(u8g2_font_ncenB10_tr);
-                  u8g2.drawStr(0, 24, " btn_primera");
+      } 
 
-                  u8g2.setFont(u8g2_font_ncenB14_tr);
-                  u8g2.setCursor(0,40);
-                  u8g2.print(F("Suscribete!"));
+      else  if (current_screen == 1){
 
-                  u8g2.setCursor(0,60);
-                  u8g2.print(POSICION);
-            }
-            if (item_selected == 1) { // SCREENSHOTS SCREEN
-                  u8g2.setFont(u8g2_font_ncenB10_tr);
-                  u8g2.drawStr(0, 24, " btn_segunda");
+        switch(item_selected) {
 
-                  u8g2.setFont(u8g2_font_ncenB14_tr);
-                  u8g2.setCursor(0,40);
-                  u8g2.print(F("Suscribete!"));
-
-                  u8g2.setCursor(0,60);
-                  u8g2.print(POSICION);
-            }
-            if (item_selected == 2) { // SCREENSHOTS SCREEN
-                  u8g2.setFont(u8g2_font_ncenB10_tr);
-                  u8g2.drawStr(0, 24, " btn_tercera");
-
-                  u8g2.setFont(u8g2_font_ncenB14_tr);
-                  u8g2.setCursor(0,40);
-                  u8g2.print(F("Suscribete!"));
-
-                  u8g2.setCursor(0,60);
-                  u8g2.print(POSICION);
-            }
-            if (item_selected == 3) { // SCREENSHOTS SCREEN
-                  u8g2.setFont(u8g2_font_ncenB10_tr);
-                  u8g2.drawStr(0, 24, " btn_cuarta");
-
-                  u8g2.setFont(u8g2_font_ncenB14_tr);
-                  u8g2.setCursor(0,40);
-                  u8g2.print(F("Suscribete!"));
-
-                  u8g2.setCursor(0,60);
-                  u8g2.print(POSICION);
-            }
-
+          case 0: 
+              primeraPantalla();
+              break;
+          case 1:
+              segundaPantalla();
+              break;
+          case 2:
+              terceraPantalla();
+              break;
+          case 3: 
+              cuartaPantalla();
+              break;
+          default:
+            break;
+        }
+    
       }     
 
        else if (current_screen == 2) { // QR SCREEN
@@ -1031,30 +1010,6 @@ void loop() {
        }   
  
     u8g2.sendBuffer();
-
-
-    switch(item_selected) {
-
-      case 0: 
-          primeraPantalla();
-          break;
-      case 1:
-          segundaPantalla();
-          break;
-      case 2:
-          terceraPantalla();
-          break;
-      case 3: 
-          cuartaPantalla();
-          break;
-      default:
-         break;
-    }
-    
-        
-
-
-    
 
   }
  
@@ -1122,117 +1077,39 @@ void checkEncoderButton() {
 
 void primeraPantalla() {
 
-
-    int btnState = digitalRead(SW);
-
-    if (btnState == LOW) {
-        if (!buttonPressed && (millis() - lastButtonPress > 50)) {
-            buttonPressed = true;
-            btn_primera = true;
-            //Serial.println("Button pressed!****************************************************");
-                // if (current_screen == 0) {current_screen = 1;} // menu items screen --> screenshots screen
-                // else if (current_screen == 1) {current_screen = 2;} // screenshots screen --> qr codes screen
-                // else {current_screen = 0;} // qr codes screen --> menu items screen
-        }
-    } else {
-        buttonPressed = false;
-        btn_primera = false;
-    }
-    // u8g2.setFont(u8g2_font_ncenB10_tr);
-    // u8g2.drawStr(0, 24, " primeraPantalla");
-
-    // u8g2.setFont(u8g2_font_ncenB14_tr);
-    // u8g2.setCursor(0,40);
-    // u8g2.print(F("Suscribete!"));
-
-    // u8g2.setCursor(0,60);
-
+    u8g2.setFont(u8g2_font_ncenB10_tr);
+    u8g2.drawStr(0, 24, " primeraPantalla");
+    u8g2.setFont(u8g2_font_ncenB14_tr);
+    u8g2.setCursor(0,40);
+    u8g2.print(F("Suscribete!"));
 
 }
 
 void segundaPantalla() {
 
-    int btnState = digitalRead(SW);
-
-    if (btnState == LOW) {
-        if (!buttonPressed && (millis() - lastButtonPress > 50)) {
-            buttonPressed = true;
-            btn_segunda = true;
-            //Serial.println("Button pressed!****************************************************");
-                // if (current_screen == 0) {current_screen = 1;} // menu items screen --> screenshots screen
-                // else if (current_screen == 1) {current_screen = 2;} // screenshots screen --> qr codes screen
-                // else {current_screen = 0;} // qr codes screen --> menu items screen
-        }
-    } else {
-        buttonPressed = false;
-        btn_segunda = false;
-    }
-
-    // u8g2.setFont(u8g2_font_ncenB10_tr);
-    // u8g2.drawStr(0, 24, " segundaPantalla");
-
-    // u8g2.setFont(u8g2_font_ncenB14_tr);
-    // u8g2.setCursor(0,40);
-    // u8g2.print(F("Suscribete!"));
-
-    // u8g2.setCursor(0,60);
+    u8g2.setFont(u8g2_font_ncenB10_tr);
+    u8g2.drawStr(0, 24, " segundaPantalla");
+    u8g2.setFont(u8g2_font_ncenB14_tr);
+    u8g2.setCursor(0,40);
+    u8g2.print(F("Suscribete!"));
 
 }
 void terceraPantalla() {
 
-
-    int btnState = digitalRead(SW);
-
-    if (btnState == LOW) {
-        if (!buttonPressed && (millis() - lastButtonPress > 50)) {
-            buttonPressed = true;
-            btn_tercera = true;
-            //Serial.println("Button pressed!****************************************************");
-                // if (current_screen == 0) {current_screen = 1;} // menu items screen --> screenshots screen
-                // else if (current_screen == 1) {current_screen = 2;} // screenshots screen --> qr codes screen
-                // else {current_screen = 0;} // qr codes screen --> menu items screen
-        }
-    } else {
-        buttonPressed = false;
-        btn_tercera = false;
-    }
-
-    // u8g2.setFont(u8g2_font_ncenB10_tr);
-    // u8g2.drawStr(0, 24, " terceraPantalla");
-
-    // u8g2.setFont(u8g2_font_ncenB14_tr);
-    // u8g2.setCursor(0,40);
-    // u8g2.print(F("Suscribete!"));
-
-    // u8g2.setCursor(0,60);
+    u8g2.setFont(u8g2_font_ncenB10_tr);
+    u8g2.drawStr(0, 24, " terceraPantalla");
+    u8g2.setFont(u8g2_font_ncenB14_tr);
+    u8g2.setCursor(0,40);
+    u8g2.print(F("Suscribete!"));
 
 }
 void cuartaPantalla() {
 
-    int btnState = digitalRead(SW);
-
-    if (btnState == LOW) {
-        if (!buttonPressed && (millis() - lastButtonPress > 50)) {
-            buttonPressed = true;
-            btn_cuarta = true;
-            //Serial.println("Button pressed!****************************************************");
-                // if (current_screen == 0) {current_screen = 1;} // menu items screen --> screenshots screen
-                // else if (current_screen == 1) {current_screen = 2;} // screenshots screen --> qr codes screen
-                // else {current_screen = 0;} // qr codes screen --> menu items screen
-        }
-    } else {
-        buttonPressed = false;
-        btn_cuarta = false;
-    }
-
-    // u8g2.setFont(u8g2_font_ncenB10_tr);
-    // u8g2.drawStr(0, 24, " cuartaPantalla");
-
-    // u8g2.setFont(u8g2_font_ncenB14_tr);
-    // u8g2.setCursor(0,40);
-    // u8g2.print(F("Suscribete!"));
-
-    // u8g2.setCursor(0,60);
+    u8g2.setFont(u8g2_font_ncenB10_tr);
+    u8g2.drawStr(0, 24, " cuartaPantalla");
+    u8g2.setFont(u8g2_font_ncenB14_tr);
+    u8g2.setCursor(0,40);
+    u8g2.print(F("Suscribete!"));
 
 }
 
@@ -1248,7 +1125,7 @@ void arrancar(){
 }
 
 
-//**************************************************************
+//************************************************************************************************************************************************************************************************************************************
 //                 FUNCIÓN ENCENDER LED
 //**************************************************************
 
