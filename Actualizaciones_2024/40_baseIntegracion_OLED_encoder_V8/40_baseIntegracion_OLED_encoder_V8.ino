@@ -21,7 +21,7 @@ enum estados
 int estado_actual = EST_DETECCION;
 int estado_anterior = EST_APAGADO;
 
-
+uint8_t inputValue = 10;
 //SWITCH
 
 const int switchPin = 8; 
@@ -52,6 +52,9 @@ U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0);
 
 int item_selected = 0; 
 int item_selected_anterior = 3; 
+
+int item_hora = 10; 
+int item_hora_anterior = 6; 
 
 int item_sel_previous; 
 int item_sel_next; 
@@ -1028,21 +1031,32 @@ void encoder() {
             if (digitalRead(DT) == HIGH) {
                 POSICION++;
                 item_selected++;
+                item_hora++;
                 if (item_selected >= NUM_ITEMS) {
                     item_selected = 0;
                 }
+                if (item_hora >= 12) {
+                    item_hora = 0;
+                }
+                
             } else {
                 POSICION--;
                 item_selected--;
+                item_hora--;
                 if (item_selected < 0) {
                     item_selected = NUM_ITEMS - 1;
+                }
+                if (item_hora < 0) {
+                    item_hora = 12 - 1;
                 }
             }
         } else {
             if (digitalRead(DT) == HIGH) {
                 POSICION++;
+                item_hora++;
             } else {
                 POSICION--;
+                item_hora--;
             }
             POSICION = min(12, max(0, POSICION)); // Limita POSICION a valores entre 0 y 12
             item_selected = 3; // Mantén item_selected en 3 mientras estés en la cuarta pantalla
@@ -1119,14 +1133,28 @@ void terceraPantalla() {
 
 
 void cuartaPantalla() {
+
+
     cuartaPantallaActive = true;
-    u8g2.setFont(u8g2_font_ncenB10_tr);
-    u8g2.drawStr(0, 24, " cuartaPantalla");
+    u8g2.clearBuffer();
+
     u8g2.setFont(u8g2_font_ncenB14_tr);
-    // u8g2.setCursor(0,40);
-    // u8g2.print(F("Suscribete!"));
-    u8g2.setCursor(0,50);
-    //u8g2.print(POSICION);
+    u8g2.setCursor(0,24);
+    //u8g2.setFontRefHeightAll();  	/* this will add some extra space for the text inside the buttons */
+    u8g2.userInterfaceMessage("Title1", "Title2", "Title3", " Ok \n Cancel ");
+    // u8g2.print(item_hora);
+    // u8g2.print("Value: "); // Texto antes del valor
+    //u8g2.userInterfaceInputValue("Enter Value", "", &inputValue, 0, 255, 3, "");
+
+     // Muestra el valor ingresado
+    //u8g2.setCursor(0, 64); // Cambia la posición vertical si es necesario
+    //u8g2.print("Value: "+String(inputValue));
+    //u8g2.print(inputValue);
+
+    u8g2.sendBuffer();
+
+    //delay(100);
+
 
     selected_hour = 3; 
 }
