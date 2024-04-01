@@ -12,7 +12,7 @@ volatile int POSICION = 1;
 int ANTERIOR = 1;	
 int lastStateCLK;
 
-//***********
+//************
 
 bool buttonPressed = false;
 unsigned long lastButtonPress = 0;
