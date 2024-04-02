@@ -38,24 +38,7 @@ int item_sel_next;
 //      SWITCH
 // ******************
 
-const int switchPin = 8;
-
-
-// ******************
-//      RTC y RELAY
-// ******************
-
-#include <Wire.h>		
-#include <RTClib.h>		
-
-RTC_DS3231 rtc;	
-
-bool evento_inicio = true;	
-bool evento_fin = true;		
-
-# define RELE 4			
-
-
+const int switchPin = 8; 
 
 // **************************************************************************************************************
 
@@ -887,7 +870,7 @@ char menu_items [NUM_ITEMS] [MAX_ITEM_LENGTH] = {  // array with item names
   { "3D Cube" }, 
   { "Battery" }, 
   { "Dashboard" }, 
-  { "ConfiG Riego" }, 
+  { "Fireworks" }, 
 
  };
 
@@ -905,22 +888,11 @@ void setup() {
   pinMode(SW, INPUT_PULLUP);
   lastStateCLK = digitalRead(CLK);
   attachInterrupt(digitalPinToInterrupt(CLK), encoder, LOW);
-
-  //RTC y RELAY
-  pinMode(RELE, OUTPUT);	
-  if (! rtc.begin()) {				
-  Serial.println("Modulo RTC no encontrado !");	
-  while (1);	
-  }
 }
 
 //****************************************************************************************************************************************************************************************************
 
 void loop() {
-
-  alarmaRiego();
-
-  arrancar();
   
 
   while(digitalRead(switchPin) == LOW){
@@ -1141,55 +1113,4 @@ void cuartaPantalla() {
       u8g2.setCursor(0,60);
       u8g2.print(POSICION);
 
-}
-
-//**************************************************************
-//             FUNCIÓN SWITCH
-//**************************************************************
-void arrancar(){
-    u8g2.clearBuffer(); 
-    u8g2.drawXBMP( 0, 0, 128, 64, bitmap_screenshots[0]); // draw screenshot
-    u8g2.sendBuffer();
-}
-
-//**************************************************************
-//             FUNCIÓN ALARMA RIEGO
-//**************************************************************
-void alarmaRiego () {
- DateTime fecha = rtc.now();				// funcion que devuelve fecha y horario en formato
-							// DateTime y asigna a variable fecha
- if ( fecha.hour() == 17 && fecha.minute() == 33  && fecha.second() == 10){	// si hora = 14 y minutos = 30
-    if ( evento_inicio == true ){			// si evento_inicio es verdadero
-      digitalWrite(RELE, HIGH);				// activa modulo de rele con nivel alto
-      Serial.println( "Rele encendido" );		// muestra texto en monitor serie
-      evento_inicio = false;				// carga valor falso en variable de control
-    }							// para evitar ingresar mas de una vez
-  }
-
- if ( fecha.hour() == 17 && fecha.minute() == 33  && fecha.second() == 20 ){	// si hora = 15 y minutos = 30
-    if ( evento_fin == true ){				// si evento_fin es verdadero
-      digitalWrite(RELE, LOW);				// desactiva modulo de rele con nivel bajo
-      Serial.println( "Rele apagado" );			// muestra texto en monitor serie
-      evento_fin = false;				// carga valor falso en variable de control
-    }							// para evitar ingresar mas de una vez
-  }
-
- Serial.print(fecha.day());				// funcion que obtiene el dia de la fecha completa
- Serial.print("/");					// caracter barra como separador
- Serial.print(fecha.month());				// funcion que obtiene el mes de la fecha completa
- Serial.print("/");					// caracter barra como separador
- Serial.print(fecha.year());				// funcion que obtiene el año de la fecha completa
- Serial.print(" ");					// caracter espacio en blanco como separador
- Serial.print(fecha.hour());				// funcion que obtiene la hora de la fecha completa
- Serial.print(":");					// caracter dos puntos como separador
- Serial.print(fecha.minute());				// funcion que obtiene los minutos de la fecha completa
- Serial.print(":");					// caracter dos puntos como separador
- Serial.println(fecha.second());			// funcion que obtiene los segundos de la fecha completa
- 
- delay(1000);						// demora de 1 segundo
-
-  if ( fecha.hour() == 2 && fecha.minute() == 0 ){ 	// si hora = 2 y minutos = 0 restablece valores de
-    evento_inicio = true;				// variables de control en verdadero
-    evento_fin = true;
-  }
 }
