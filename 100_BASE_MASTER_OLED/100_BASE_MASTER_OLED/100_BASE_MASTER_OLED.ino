@@ -47,13 +47,16 @@ const int switchPin = 8;
 
 #include <Wire.h>		
 #include <RTClib.h>		
-
 RTC_DS3231 rtc;	
-
 bool evento_inicio = true;	
 bool evento_fin = true;		
-
 # define RELE 4			
+
+int hora_alarma_fin=0;
+int minuto_alarma_fin=0;
+// int segundo_alarma_fin=0;
+volatile int segundo_alarma_fin = 20;
+
 
 
 
@@ -887,7 +890,7 @@ char menu_items [NUM_ITEMS] [MAX_ITEM_LENGTH] = {  // array with item names
   { "3D Cube" }, 
   { "Battery" }, 
   { "Dashboard" }, 
-  { "ConfiG Riego" }, 
+  { "Conf EndSec" }, 
 
  };
 
@@ -918,12 +921,13 @@ void setup() {
 
 void loop() {
 
-  alarmaRiego();
 
   arrancar();
   
 
   while(digitalRead(switchPin) == LOW){
+    
+    alarmaRiego();
 
           u8g2.firstPage();
           do {
@@ -943,41 +947,34 @@ void loop() {
 
             if (current_screen == 0) 
             { 
-              Serial.println("current_screen  = 0 ");
+              //Serial.println("current_screen  = 0 ");
                     u8g2.drawXBMP(0, 22, 128, 21, bitmap_item_sel_outline);
-                    // draw previous item as icon + label
                     u8g2.setFont(u8g_font_7x14);
                     u8g2.drawStr(25, 15, menu_items[item_sel_previous]); 
                     u8g2.drawXBMP( 4, 2, 16, 16, bitmap_icons[item_sel_previous]);          
 
-                    // draw selected item as icon + label in bold font
                     u8g2.setFont(u8g_font_7x14B);    
                     u8g2.drawStr(25, 15+20+2, menu_items[item_selected]);   
                     u8g2.drawXBMP( 4, 24, 16, 16, bitmap_icons[item_selected]);     
 
-                    // draw next item as icon + label
                     u8g2.setFont(u8g_font_7x14);     
                     u8g2.drawStr(25, 15+20+20+2+2, menu_items[item_sel_next]);   
                     u8g2.drawXBMP( 4, 46, 16, 16, bitmap_icons[item_sel_next]);  
 
-                    // draw scrollbar background
                     u8g2.drawXBMP(128-8, 0, 8, 64, bitmap_scrollbar_background);
 
-                    // draw scrollbar handle
                     u8g2.drawBox(125, 64/NUM_ITEMS * item_selected, 3, 64/NUM_ITEMS); 
 
-                    // draw upir logo
                     u8g2.drawXBMP(128-16-4, 64-4, 16, 4, upir_logo);
 
-                    // Llama a nextPage() para finalizar la página actual
                     u8g2.nextPage();  
 
             } else  if (current_screen == 1)
             { 
 
-              Serial.println("current_screen  = 1 ");
-              Serial.print("item_selected  =");
-              Serial.println(item_selected );
+              // Serial.println("current_screen  = 1 ");
+              // Serial.print("item_selected  =");
+              // Serial.println(item_selected );
 
                 switch(item_selected) {
 
@@ -999,7 +996,7 @@ void loop() {
             } 
             else if (current_screen == 2) 
             { 
-              Serial.println("current_screen  = 2 ");
+              //Serial.println("current_screen  = 2 ");
 
               u8g2.drawXBMP( 0, 0, 128, 64, bitmap_qr_codes[item_selected]);
             }  
@@ -1050,10 +1047,14 @@ void encoder()  {
 
       if (digitalRead(DT) == HIGH) {
             POSICION++;
+            segundo_alarma_fin++;
       }else {
             POSICION--;
+            segundo_alarma_fin--;
       }
       POSICION = min(100, max(0, POSICION));
+      segundo_alarma_fin = min(59, max(0, POSICION));
+
       item_selected = 3;
     }
 
@@ -1139,7 +1140,7 @@ void cuartaPantalla() {
       u8g2.print(F("Suscribete!"));
 
       u8g2.setCursor(0,60);
-      u8g2.print(POSICION);
+      u8g2.print(segundo_alarma_fin);
 
 }
 
@@ -1158,35 +1159,35 @@ void arrancar(){
 void alarmaRiego () {
  DateTime fecha = rtc.now();				// funcion que devuelve fecha y horario en formato
 							// DateTime y asigna a variable fecha
- if ( fecha.hour() == 17 && fecha.minute() == 33  && fecha.second() == 10){	// si hora = 14 y minutos = 30
+ if ( fecha.hour() == 18 && fecha.minute() == 30  && fecha.second() == 10){	// si hora = 14 y minutos = 30
     if ( evento_inicio == true ){			// si evento_inicio es verdadero
       digitalWrite(RELE, HIGH);				// activa modulo de rele con nivel alto
-      Serial.println( "Rele encendido" );		// muestra texto en monitor serie
+      //Serial.println( "Rele encendido" );		// muestra texto en monitor serie
       evento_inicio = false;				// carga valor falso en variable de control
     }							// para evitar ingresar mas de una vez
   }
 
- if ( fecha.hour() == 17 && fecha.minute() == 33  && fecha.second() == 20 ){	// si hora = 15 y minutos = 30
+ if ( fecha.hour() == 18 && fecha.minute() == 30  && fecha.second() == segundo_alarma_fin ){	// si hora = 15 y minutos = 30
     if ( evento_fin == true ){				// si evento_fin es verdadero
       digitalWrite(RELE, LOW);				// desactiva modulo de rele con nivel bajo
-      Serial.println( "Rele apagado" );			// muestra texto en monitor serie
+      //Serial.println( "Rele apagado" );			// muestra texto en monitor serie
       evento_fin = false;				// carga valor falso en variable de control
     }							// para evitar ingresar mas de una vez
   }
 
- Serial.print(fecha.day());				// funcion que obtiene el dia de la fecha completa
- Serial.print("/");					// caracter barra como separador
- Serial.print(fecha.month());				// funcion que obtiene el mes de la fecha completa
- Serial.print("/");					// caracter barra como separador
- Serial.print(fecha.year());				// funcion que obtiene el año de la fecha completa
- Serial.print(" ");					// caracter espacio en blanco como separador
- Serial.print(fecha.hour());				// funcion que obtiene la hora de la fecha completa
- Serial.print(":");					// caracter dos puntos como separador
- Serial.print(fecha.minute());				// funcion que obtiene los minutos de la fecha completa
- Serial.print(":");					// caracter dos puntos como separador
- Serial.println(fecha.second());			// funcion que obtiene los segundos de la fecha completa
+//  Serial.print(fecha.day());				// funcion que obtiene el dia de la fecha completa
+//  Serial.print("/");					// caracter barra como separador
+//  Serial.print(fecha.month());				// funcion que obtiene el mes de la fecha completa
+//  Serial.print("/");					// caracter barra como separador
+//  Serial.print(fecha.year());				// funcion que obtiene el año de la fecha completa
+//  Serial.print(" ");					// caracter espacio en blanco como separador
+//  Serial.print(fecha.hour());				// funcion que obtiene la hora de la fecha completa
+//  Serial.print(":");					// caracter dos puntos como separador
+//  Serial.print(fecha.minute());				// funcion que obtiene los minutos de la fecha completa
+//  Serial.print(":");					// caracter dos puntos como separador
+//  Serial.println(fecha.second());			// funcion que obtiene los segundos de la fecha completa
  
- delay(1000);						// demora de 1 segundo
+ //delay(1000);						// demora de 1 segundo
 
   if ( fecha.hour() == 2 && fecha.minute() == 0 ){ 	// si hora = 2 y minutos = 0 restablece valores de
     evento_inicio = true;				// variables de control en verdadero
