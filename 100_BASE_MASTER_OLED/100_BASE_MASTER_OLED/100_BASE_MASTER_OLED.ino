@@ -1153,7 +1153,7 @@ void arrancar(){
 }
 
 //**************************************************************
-//             FUNCIÓN ALARMA RIEGO
+//             FUNCIÓN ALARMA RIEGO solo
 //**************************************************************
 void alarmaRiego () {
  DateTime fecha = rtc.now();				// funcion que devuelve fecha y horario en formato
