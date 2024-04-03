@@ -20,18 +20,12 @@ int lastStateCLK;
 
 bool buttonPressed = false;
 unsigned long lastButtonPress = 0;
-
 int item_selected = 0; 
-int item_selected_anterior = 3; 
-
 int current_screen = 0; 
-
 const int NUM_ITEMS = 4;
-
 bool cuartaPantallaActive = false;
-
+bool terceraPantallaActive = false;
 int item_sel_previous; 
-
 int item_sel_next; 
 
 // ******************
@@ -39,7 +33,6 @@ int item_sel_next;
 // ******************
 
 const int switchPin = 8;
-
 
 // ******************
 //      RTC y RELAY
@@ -53,9 +46,10 @@ bool evento_fin = true;
 # define RELE 4			
 
 int hora_alarma_fin=0;
-int minuto_alarma_fin=0;
+// int minuto_alarma_fin=0;
 // int segundo_alarma_fin=0;
 volatile int segundo_alarma_fin = 20;
+volatile int minuto_alarma_fin = 30;
 
 
 
@@ -1023,11 +1017,51 @@ void encoder()  {
 
   if (tiempoInterrupcion - ultimaInterrupcion > 5) {
 			
-    if (!cuartaPantallaActive) {
+    if (cuartaPantallaActive) {
+
+      if (digitalRead(DT) == HIGH) {
+            segundo_alarma_fin++;
+            if (segundo_alarma_fin >= 60) {
+              segundo_alarma_fin = 0;
+            }
+      }else {
+            segundo_alarma_fin--;
+            if (segundo_alarma_fin < 0) {
+              segundo_alarma_fin = 60 - 1;
+            }
+      }
+
+      item_selected = 3;
+    }
+
+    //********************************
+    else if(terceraPantallaActive){
+      
+    
+
+          if (digitalRead(DT) == HIGH) {
+
+              minuto_alarma_fin++;
+              if(minuto_alarma_fin >= 60){
+                minuto_alarma_fin = 0;
+              }
+
+            }else {
+
+              minuto_alarma_fin--;
+              if (minuto_alarma_fin < 0){
+                minuto_alarma_fin = 60 - 1; 
+              }
+            }
+
+            item_selected = 2;
+
+    }
+
+    else {
 
         if (digitalRead(DT) == HIGH)
         {
-          POSICION++ ;
           item_selected++;
           if (item_selected >= NUM_ITEMS) {
               item_selected = 0;
@@ -1035,28 +1069,15 @@ void encoder()  {
           
         }
         else {				
-          POSICION-- ;	
           item_selected--;		
           if (item_selected < 0) {
               item_selected = NUM_ITEMS - 1;
           }
           
         }
-
-    }else{
-
-      if (digitalRead(DT) == HIGH) {
-            POSICION++;
-            segundo_alarma_fin++;
-      }else {
-            POSICION--;
-            segundo_alarma_fin--;
-      }
-      POSICION = min(100, max(0, POSICION));
-      segundo_alarma_fin = min(59, max(0, POSICION));
-
-      item_selected = 3;
     }
+
+    //********************************
 
     
     ultimaInterrupcion = tiempoInterrupcion;
@@ -1080,7 +1101,9 @@ void checkEncoderButton() {
                         break;
                     case 1:
                         current_screen = 2;
+
                         cuartaPantallaActive = false;
+                        terceraPantallaActive = false;
                         break;
                     case 2:
                         current_screen = 0;
@@ -1120,11 +1143,16 @@ void segundaPantalla() {
 }
 void terceraPantalla() {
 
+  terceraPantallaActive = true;
     u8g2.setFont(u8g2_font_ncenB10_tr);
     u8g2.drawStr(0, 24, " terceraPantalla");
     u8g2.setFont(u8g2_font_ncenB14_tr);
     u8g2.setCursor(0,40);
     u8g2.print(F("Suscribete!"));
+
+    u8g2.setCursor(0,60);
+    u8g2.print(minuto_alarma_fin);
+    
 
 }
 
@@ -1132,15 +1160,15 @@ void terceraPantalla() {
 void cuartaPantalla() {
 
   cuartaPantallaActive = true;
-      u8g2.setFont(u8g2_font_ncenB10_tr);
-      u8g2.drawStr(0, 24, " Jaime el crack");
+    u8g2.setFont(u8g2_font_ncenB10_tr);
+    u8g2.drawStr(0, 24, " Jaime el crack");
 
-      u8g2.setFont(u8g2_font_ncenB14_tr);
-      u8g2.setCursor(0,40);
-      u8g2.print(F("Suscribete!"));
+    u8g2.setFont(u8g2_font_ncenB14_tr);
+    u8g2.setCursor(0,40);
+    u8g2.print(F("Suscribete!"));
 
-      u8g2.setCursor(0,60);
-      u8g2.print(segundo_alarma_fin);
+    u8g2.setCursor(0,60);
+    u8g2.print(segundo_alarma_fin);
 
 }
 
@@ -1167,7 +1195,7 @@ void alarmaRiego () {
     }							// para evitar ingresar mas de una vez
   }
 
- if ( fecha.hour() == 18 && fecha.minute() == 30  && fecha.second() == segundo_alarma_fin ){	// si hora = 15 y minutos = 30
+ if ( fecha.hour() == 18 && fecha.minute() == minuto_alarma_fin  && fecha.second() == segundo_alarma_fin ){	// si hora = 15 y minutos = 30
     if ( evento_fin == true ){				// si evento_fin es verdadero
       digitalWrite(RELE, LOW);				// desactiva modulo de rele con nivel bajo
       //Serial.println( "Rele apagado" );			// muestra texto en monitor serie
