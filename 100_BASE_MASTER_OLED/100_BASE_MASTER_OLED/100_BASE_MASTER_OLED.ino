@@ -25,6 +25,7 @@ int current_screen = 0;
 const int NUM_ITEMS = 4;
 bool cuartaPantallaActive = false;
 bool terceraPantallaActive = false;
+bool segundaPantallaActive = false;
 int item_sel_previous; 
 int item_sel_next; 
 
@@ -45,11 +46,12 @@ bool evento_inicio = true;
 bool evento_fin = true;		
 # define RELE 4			
 
-int hora_alarma_fin=0;
+// int hora_alarma_fin=0;
 // int minuto_alarma_fin=0;
 // int segundo_alarma_fin=0;
 volatile int segundo_alarma_fin = 20;
 volatile int minuto_alarma_fin = 30;
+volatile int hora_alarma_fin = 6;
 
 
 
@@ -1058,6 +1060,29 @@ void encoder()  {
 
     }
 
+    else if(segundaPantallaActive){
+
+      
+
+      if (digitalRead(DT) == HIGH) {
+
+              hora_alarma_fin++;
+              if(hora_alarma_fin >= 12){
+                hora_alarma_fin = 0;
+              }
+
+            }else {
+
+              hora_alarma_fin--;
+              if (hora_alarma_fin < 0){
+                hora_alarma_fin = 12 - 1; 
+              }
+            }
+
+            item_selected = 1;
+      
+    }
+
     else {
 
         if (digitalRead(DT) == HIGH)
@@ -1104,6 +1129,7 @@ void checkEncoderButton() {
 
                         cuartaPantallaActive = false;
                         terceraPantallaActive = false;
+                        segundaPantallaActive = false;
                         break;
                     case 2:
                         current_screen = 0;
@@ -1134,11 +1160,16 @@ void primeraPantalla() {
 
 void segundaPantalla() {
 
+  segundaPantallaActive = true;
+
     u8g2.setFont(u8g2_font_ncenB10_tr);
     u8g2.drawStr(0, 24, " segundaPantalla");
     u8g2.setFont(u8g2_font_ncenB14_tr);
     u8g2.setCursor(0,40);
     u8g2.print(F("Suscribete!"));
+
+    u8g2.setCursor(0,60);
+    u8g2.print(hora_alarma_fin);
 
 }
 void terceraPantalla() {
@@ -1195,7 +1226,7 @@ void alarmaRiego () {
     }							// para evitar ingresar mas de una vez
   }
 
- if ( fecha.hour() == 18 && fecha.minute() == minuto_alarma_fin  && fecha.second() == segundo_alarma_fin ){	// si hora = 15 y minutos = 30
+ if ( fecha.hour() == hora_alarma_fin && fecha.minute() == minuto_alarma_fin  && fecha.second() == segundo_alarma_fin ){	// si hora = 15 y minutos = 30
     if ( evento_fin == true ){				// si evento_fin es verdadero
       digitalWrite(RELE, LOW);				// desactiva modulo de rele con nivel bajo
       //Serial.println( "Rele apagado" );			// muestra texto en monitor serie
