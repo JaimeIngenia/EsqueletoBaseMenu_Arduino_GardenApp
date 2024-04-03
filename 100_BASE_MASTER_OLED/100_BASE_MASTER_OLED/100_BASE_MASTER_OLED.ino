@@ -26,6 +26,10 @@ const int NUM_ITEMS = 8;
 bool cuartaPantallaActive = false;
 bool terceraPantallaActive = false;
 bool segundaPantallaActive = false;
+
+bool quintaPantallaActive = false;
+bool sextaPantallaActive = false;
+bool septimaPantallaActive = false;
 int item_sel_previous; 
 int item_sel_next; 
 
@@ -46,13 +50,13 @@ bool evento_inicio = true;
 bool evento_fin = true;		
 # define RELE 4			
 
-// int hora_alarma_fin=0;
-// int minuto_alarma_fin=0;
-// int segundo_alarma_fin=0;
 volatile int segundo_alarma_fin = 20;
 volatile int minuto_alarma_fin = 30;
 volatile int hora_alarma_fin = 6;
 
+volatile int segundo_alarma_Ini = 25; // septima pantalla
+volatile int minuto_alarma_Ini = 35; // Sexta pantalla
+volatile int hora_alarma_Ini = 5; // quinta pantalla
 
 
 
@@ -1739,6 +1743,16 @@ void loop() {
                   case 3: 
                       cuartaPantalla();
                       break;
+                  case 4:
+                      quintaPantalla();
+                      break;
+                  case 5: 
+                      sextaPantalla();
+                      break;
+                  case 6: 
+                    septimaPantalla();
+                    break;
+                
                   default:
                     break;
                 }
@@ -1823,21 +1837,85 @@ void encoder()  {
 
       if (digitalRead(DT) == HIGH) {
 
-              hora_alarma_fin++;
-              if(hora_alarma_fin >= 12){
-                hora_alarma_fin = 0;
+        hora_alarma_fin++;
+        if(hora_alarma_fin >= 24){
+          hora_alarma_fin = 0;
+        }
+
+      }else {
+
+        hora_alarma_fin--;
+        if (hora_alarma_fin < 0){
+          hora_alarma_fin = 24 - 1; 
+        }
+      }
+
+      item_selected = 1;
+      
+    }
+
+    else if(quintaPantallaActive){
+
+      
+      if (digitalRead(DT) == HIGH) {
+
+        hora_alarma_Ini++;
+        if(hora_alarma_Ini >= 24){
+          hora_alarma_Ini = 0;
+        }
+
+      }else {
+
+        hora_alarma_Ini--;
+        if (hora_alarma_Ini < 0){
+          hora_alarma_Ini = 24 - 1; 
+        }
+      }
+
+      item_selected = 4;
+
+    }
+
+    else if (sextaPantallaActive){
+      
+
+          if (digitalRead(DT) == HIGH) {
+
+            minuto_alarma_Ini++;
+            if(minuto_alarma_Ini >= 60){
+              minuto_alarma_Ini = 0;
+            }
+
+          }else {
+
+            minuto_alarma_Ini--;
+            if (minuto_alarma_Ini < 0){
+              minuto_alarma_Ini = 60 - 1; 
+            }
+          }
+
+          item_selected = 5;
+    }
+
+    else if (septimaPantallaActive){
+
+        if (digitalRead(DT) == HIGH) {
+
+              segundo_alarma_Ini++;
+              if(segundo_alarma_Ini >= 60){
+                segundo_alarma_Ini = 0;
               }
 
             }else {
 
-              hora_alarma_fin--;
-              if (hora_alarma_fin < 0){
-                hora_alarma_fin = 12 - 1; 
+              segundo_alarma_Ini--;
+              if (segundo_alarma_Ini < 0){
+                segundo_alarma_Ini = 60 - 1; 
               }
             }
 
-            item_selected = 1;
-      
+            item_selected = 6;
+
     }
 
     else {
@@ -1887,6 +1965,10 @@ void checkEncoderButton() {
                         cuartaPantallaActive = false;
                         terceraPantallaActive = false;
                         segundaPantallaActive = false;
+                        quintaPantallaActive = false;
+                        sextaPantallaActive = false;
+                        septimaPantallaActive = false;
+                        
                         break;
                     case 2:
                         current_screen = 0;
@@ -1949,7 +2031,7 @@ void cuartaPantalla() {
 
   cuartaPantallaActive = true;
     u8g2.setFont(u8g2_font_ncenB10_tr);
-    u8g2.drawStr(0, 24, " Jaime el crack");
+    u8g2.drawStr(0, 24, " Cuarta Pantalla");
 
     u8g2.setFont(u8g2_font_ncenB14_tr);
     u8g2.setCursor(0,40);
@@ -1959,6 +2041,53 @@ void cuartaPantalla() {
     u8g2.print(segundo_alarma_fin);
 
 }
+
+void quintaPantalla() {
+
+  quintaPantallaActive = true;
+    u8g2.setFont(u8g2_font_ncenB10_tr);
+    u8g2.drawStr(0, 24, " Quinta Pantalla");
+
+    u8g2.setFont(u8g2_font_ncenB14_tr);
+    u8g2.setCursor(0,40);
+    u8g2.print(F("Suscribete!"));
+
+    u8g2.setCursor(0,60);
+    u8g2.print(hora_alarma_Ini);
+
+}
+
+void sextaPantalla() {
+
+  sextaPantallaActive = true;
+    u8g2.setFont(u8g2_font_ncenB10_tr);
+    u8g2.drawStr(0, 24, " Sexta Pantalla");
+
+    u8g2.setFont(u8g2_font_ncenB14_tr);
+    u8g2.setCursor(0,40);
+    u8g2.print(F("Suscribete!"));
+
+    u8g2.setCursor(0,60);
+    u8g2.print(minuto_alarma_Ini);
+
+}
+
+void septimaPantalla() {
+
+  septimaPantallaActive = true;
+    u8g2.setFont(u8g2_font_ncenB10_tr);
+    u8g2.drawStr(0, 24, " Septima Pantalla");
+
+    u8g2.setFont(u8g2_font_ncenB14_tr);
+    u8g2.setCursor(0,40);
+    u8g2.print(F("Suscribete!"));
+
+    u8g2.setCursor(0,60);
+    u8g2.print(segundo_alarma_Ini);
+
+}
+
+
 
 //**************************************************************
 //             FUNCIÓN SWITCH
@@ -1975,7 +2104,7 @@ void arrancar(){
 void alarmaRiego () {
  DateTime fecha = rtc.now();				// funcion que devuelve fecha y horario en formato
 							// DateTime y asigna a variable fecha
- if ( fecha.hour() == 18 && fecha.minute() == 30  && fecha.second() == 10){	// si hora = 14 y minutos = 30
+ if ( fecha.hour() == hora_alarma_Ini && fecha.minute() == minuto_alarma_Ini  && fecha.second() == segundo_alarma_Ini){	// si hora = 14 y minutos = 30
     if ( evento_inicio == true ){			// si evento_inicio es verdadero
       digitalWrite(RELE, HIGH);				// activa modulo de rele con nivel alto
       //Serial.println( "Rele encendido" );		// muestra texto en monitor serie
