@@ -20,9 +20,9 @@ void setup () {
     abort();
   }
 
-   //modulo_rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+   modulo_rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
 
-   //modulo_rtc.adjust(DateTime(2024, 4, 2, 17, 12, 0));
+   modulo_rtc.adjust(DateTime(2024, 4, 4, 18, 22, 0));
 
 
 }

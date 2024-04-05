@@ -46,17 +46,25 @@ const int switchPin = 8;
 #include <Wire.h>		
 #include <RTClib.h>		
 RTC_DS3231 rtc;	
-bool evento_inicio = true;	
-bool evento_fin = true;		
 # define RELE 4			
 
 volatile int segundo_alarma_fin = 20;
-volatile int minuto_alarma_fin = 30;
-volatile int hora_alarma_fin = 6;
+volatile int minuto_alarma_fin = 24;
+volatile int hora_alarma_fin = 18;
 
-volatile int segundo_alarma_Ini = 25; // septima pantalla
-volatile int minuto_alarma_Ini = 35; // Sexta pantalla
-volatile int hora_alarma_Ini = 5; // quinta pantalla
+volatile int segundo_alarma_Ini = 10; // septima pantalla
+volatile int minuto_alarma_Ini = 24; // Sexta pantalla
+volatile int hora_alarma_Ini = 18; // quinta pantalla
+
+
+// ******************
+//      TIERRA HUMEDAD
+// ******************
+
+
+int ultimo_valor_humedad = 0;
+
+float porcentaje_humedad = 0;
 
 
 
@@ -1684,6 +1692,20 @@ void loop() {
 
           u8g2.firstPage();
           do {
+            
+            
+            sensorHumedad();
+            // // Leer el valor actual del sensor de humedad
+            // int humedad_tierra_actual = analogRead(A0);
+
+            // // Calcular la diferencia entre el valor actual y el último valor
+            // int diferencia = abs(humedad_tierra_actual - ultimo_valor_humedad);
+
+
+            // if (diferencia > 150) {
+            //   // Actualizar el último valor leído
+            //   ultimo_valor_humedad = humedad_tierra_actual;
+            // }
 
             checkEncoderButton();
 
@@ -1984,6 +2006,7 @@ void checkEncoderButton() {
 
 }
 
+
 //******************
 
 void primeraPantalla() {
@@ -1992,7 +2015,12 @@ void primeraPantalla() {
     u8g2.drawStr(0, 24, " primeraPantalla");
     u8g2.setFont(u8g2_font_ncenB14_tr);
     u8g2.setCursor(0,40);
-    u8g2.print(F("Suscribete!"));
+    u8g2.print(F("humedad_tierra!"));
+    
+    u8g2.setCursor(0,60);
+    // u8g2.print(ultimo_valor_humedad);
+    u8g2.print(porcentaje_humedad);
+    u8g2.print(F("%")); // Concatenar el símbolo "%" al final del valor de porcentaje_humedad
 
 }
 
@@ -2103,21 +2131,12 @@ void arrancar(){
 //**************************************************************
 void alarmaRiego () {
  DateTime fecha = rtc.now();				// funcion que devuelve fecha y horario en formato
-							// DateTime y asigna a variable fecha
  if ( fecha.hour() == hora_alarma_Ini && fecha.minute() == minuto_alarma_Ini  && fecha.second() == segundo_alarma_Ini){	// si hora = 14 y minutos = 30
-    if ( evento_inicio == true ){			// si evento_inicio es verdadero
       digitalWrite(RELE, HIGH);				// activa modulo de rele con nivel alto
-      //Serial.println( "Rele encendido" );		// muestra texto en monitor serie
-      evento_inicio = false;				// carga valor falso en variable de control
-    }							// para evitar ingresar mas de una vez
   }
 
  if ( fecha.hour() == hora_alarma_fin && fecha.minute() == minuto_alarma_fin  && fecha.second() == segundo_alarma_fin ){	// si hora = 15 y minutos = 30
-    if ( evento_fin == true ){				// si evento_fin es verdadero
       digitalWrite(RELE, LOW);				// desactiva modulo de rele con nivel bajo
-      //Serial.println( "Rele apagado" );			// muestra texto en monitor serie
-      evento_fin = false;				// carga valor falso en variable de control
-    }							// para evitar ingresar mas de una vez
   }
 
 //  Serial.print(fecha.day());				// funcion que obtiene el dia de la fecha completa
@@ -2132,10 +2151,45 @@ void alarmaRiego () {
 //  Serial.print(":");					// caracter dos puntos como separador
 //  Serial.println(fecha.second());			// funcion que obtiene los segundos de la fecha completa
  
- //delay(1000);						// demora de 1 segundo
 
-  if ( fecha.hour() == 2 && fecha.minute() == 0 ){ 	// si hora = 2 y minutos = 0 restablece valores de
-    evento_inicio = true;				// variables de control en verdadero
-    evento_fin = true;
-  }
+}
+
+
+//**************************************************************
+//             FUNCIÓN SENSOR HUMEDAD
+//**************************************************************
+
+void sensorHumedad()
+{
+
+  //Cuando está sumergido en agua el valor es 400 y cuando está totalmente seco el maximo es 1000
+              // Leer el valor actual del sensor de humedad
+            int humedad_tierra_actual = analogRead(A0);
+
+            // Calcular la diferencia entre el valor actual y el último valor
+            int diferencia = abs(humedad_tierra_actual - ultimo_valor_humedad);
+
+
+            if (diferencia > 10) {
+              // Actualizar el último valor leído
+              ultimo_valor_humedad = humedad_tierra_actual;
+              // Convertir el valor de humedad a porcentaje
+              porcentaje_humedad = convertirAPorcentaje(humedad_tierra_actual);
+            }
+}
+
+float convertirAPorcentaje(int valor) {
+    // El valor mínimo del sensor
+    float valor_minimo = 400.0;
+
+    // El valor máximo del sensor
+    float valor_maximo = 1023.0;
+
+    // Convertir el valor a porcentaje
+    float porcentaje = ((valor - valor_minimo) / (valor_maximo - valor_minimo)) * 100.0;
+
+    // Asegurarse de que el porcentaje esté dentro del rango 0-100
+    porcentaje = constrain(porcentaje, 0.0, 100.0);
+
+    return porcentaje;
 }
