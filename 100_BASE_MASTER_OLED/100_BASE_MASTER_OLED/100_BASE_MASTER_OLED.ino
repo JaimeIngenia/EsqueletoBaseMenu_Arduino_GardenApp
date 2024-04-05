@@ -62,11 +62,25 @@ volatile int hora_alarma_Ini = 18; // quinta pantalla
 // ******************
 
 
-int ultimo_valor_humedad = 0;
+int ultimo_valor_humedad_tierra = 0;
 
 float porcentaje_humedad = 0;
 
+// ******************
+//      AIRE HUMEDAD
+// ******************
 
+#include <dht.h>
+dht DHT;
+#define DHT11_PIN 6
+
+float ultimo_valor_humedad_aire = 0;
+int ultimo_valor_temperatura_aire = 0;
+unsigned long ultimo_tiempo_lectura = 0;
+const unsigned long intervalo_lectura = 5000; 
+
+//float temperatura_aire_actual = 0.0;
+int temperatura_aire_entera = 0;
 
 // **************************************************************************************************************
 
@@ -1694,7 +1708,8 @@ void loop() {
           do {
             
             
-            sensorHumedad();
+            sensorHumedadTierra();
+            sensorHumedadAire();
             // // Leer el valor actual del sensor de humedad
             // int humedad_tierra_actual = analogRead(A0);
 
@@ -2012,7 +2027,10 @@ void checkEncoderButton() {
 void primeraPantalla() {
 
     u8g2.setFont(u8g2_font_ncenB10_tr);
-    u8g2.drawStr(0, 24, " primeraPantalla");
+    u8g2.setCursor(0,24);
+    //u8g2.drawStr(0, 24, "Aire:");
+    // u8g2.print(DHT.temperature);
+    u8g2.print(temperatura_aire_entera);
     u8g2.setFont(u8g2_font_ncenB14_tr);
     u8g2.setCursor(0,40);
     u8g2.print(F("humedad_tierra!"));
@@ -2156,10 +2174,10 @@ void alarmaRiego () {
 
 
 //**************************************************************
-//             FUNCIÓN SENSOR HUMEDAD
+//             FUNCIÓN TIERRA HUMEDAD
 //**************************************************************
 
-void sensorHumedad()
+void sensorHumedadTierra()
 {
 
   //Cuando está sumergido en agua el valor es 400 y cuando está totalmente seco el maximo es 1000
@@ -2167,12 +2185,12 @@ void sensorHumedad()
             int humedad_tierra_actual = analogRead(A0);
 
             // Calcular la diferencia entre el valor actual y el último valor
-            int diferencia = abs(humedad_tierra_actual - ultimo_valor_humedad);
+            int diferencia = abs(humedad_tierra_actual - ultimo_valor_humedad_tierra);
 
 
             if (diferencia > 10) {
               // Actualizar el último valor leído
-              ultimo_valor_humedad = humedad_tierra_actual;
+              ultimo_valor_humedad_tierra = humedad_tierra_actual;
               // Convertir el valor de humedad a porcentaje
               porcentaje_humedad = convertirAPorcentaje(humedad_tierra_actual);
             }
@@ -2193,3 +2211,36 @@ float convertirAPorcentaje(int valor) {
 
     return porcentaje;
 }
+
+
+//**************************************************************
+//             FUNCIÓN AIRE HUMEDAD 
+//**************************************************************
+
+void sensorHumedadAire()
+{
+
+  unsigned long tiempo_actual = millis();
+
+  if (tiempo_actual - ultimo_tiempo_lectura >= intervalo_lectura) 
+  {
+
+    DHT.read11(DHT11_PIN);
+
+    float temperatura_aire_actual = DHT.temperature;
+
+    temperatura_aire_entera = int(temperatura_aire_actual);
+
+    float diferencia = abs(temperatura_aire_actual - ultimo_valor_temperatura_aire);
+
+    if (diferencia >= 1) 
+    {
+        ultimo_valor_temperatura_aire = temperatura_aire_entera;
+    }
+
+    ultimo_tiempo_lectura = tiempo_actual;
+
+  }
+
+}
+
