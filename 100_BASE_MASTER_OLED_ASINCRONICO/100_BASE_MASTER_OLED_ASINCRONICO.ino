@@ -1039,7 +1039,7 @@ const unsigned char bitmap_item_sel_outline [] PROGMEM = {
 const int MAX_ITEM_LENGTH = 20; // maximum characters for the item name
 
 char menu_items [NUM_ITEMS] [MAX_ITEM_LENGTH] = {  // array with item names
-  { "3D Cube" }, 
+  { "Ver Sensores" }, 
   { "Conf EndHora " }, 
   { "Conf EndMin" }, 
   { "Conf EndSeg" }, 
@@ -1063,50 +1063,36 @@ char menu_items [NUM_ITEMS] [MAX_ITEM_LENGTH] = {  // array with item names
 // Variable para almacenar el estado actual del sistema
 int estado_actual = 0;
 
-//**************
-// SERIAL PRINTS 
-//**************
+//************************************************************************************
+// IMPRESIONES PUERTO SERIAL PARA ENVÍO A RASPBERRY SIN AFECTAR FLUJO DEL PROGRAMA
+//************************************************************************************
 
-void onSerialPrintCompleteTierra() {
+void onSerialPrintCompleteTierra() 
+{
+    alarmaRiego();
 
-    arrancar();
+    pantallaWaitByPrint();
 
-    // DHT.read11(DHT11_PIN);
-    // float temperatura_aire_actual = DHT.temperature;
-    // temperatura_aire_entera = int(temperatura_aire_actual);
-    // float diferencia = abs(temperatura_aire_actual - ultimo_valor_temperatura_aire);
-    // Serial.println("TEMP: "+(String)temperatura_aire_entera);
-
-    //*******
-
-    // int humedad_tierra_actual = analogRead(A0);
-    // porcentaje_humedad = convertirAPorcentaje(humedad_tierra_actual);
-    // Serial.println("HUM : "+(String)porcentaje_humedad);	
     Serial.println("HUM : "+(String)porcentaje_humedad);	
 
     estado_actual = 0; // Volver al estado inicial
 }
 
 
-void onSerialPrintCompleteAire() {
+void onSerialPrintCompleteAire() 
+{
+    alarmaRiego();
 
-    arrancar();
+    pantallaWaitByPrint();
+
     if (ultimo_valor_temperatura_aire != -999) {
       Serial.println("TEMP: " + (String)ultimo_valor_temperatura_aire);
     }
 
-    // DHT.read11(DHT11_PIN);
-    // float temperatura_aire_actual = DHT.temperature;
-    // temperatura_aire_entera = int(temperatura_aire_actual);
-    // float diferencia = abs(temperatura_aire_actual - ultimo_valor_temperatura_aire);
-    // Serial.println("TEMP: "+(String)temperatura_aire_entera);
-
     estado_actual = 0; // Volver al estado inicial
 }
 
-
-
-
+//****************************************************************************************************************************************************************************************************
 
 void setup() {
   Serial.begin(9600);
@@ -1140,12 +1126,13 @@ void loop() {
       if(digitalRead(switchPin) == LOW){
           estado_actual = EVENT_MENU;
       }
-      //Serial.println(" EL SWITH ESTÁ APAGADO!!");
       break;
 
     case EVENT_MENU:
 
-      //Serial.println(" EVENT_MENU!!");
+      // **************************
+      //   MENU PANTALLA OLED
+      // **************************
 
       alarmaRiego();
 
@@ -1246,6 +1233,7 @@ void loop() {
 
 
 }
+
 //**************************************************************
 //             FUNCIÓN TIERRA HUMEDAD
 //**************************************************************
@@ -1513,7 +1501,7 @@ void checkEncoderButton() {
 //**************************************************************
 //             FUNCIÓN ALARMA RIEGO
 //**************************************************************
-void alarmaRiego () 
+void alarmaRiego() 
 {
  DateTime fecha = rtc.now();				// funcion que devuelve fecha y horario en formato
  if ( fecha.hour() == hora_alarma_Ini && fecha.minute() == minuto_alarma_Ini  && fecha.second() == segundo_alarma_Ini)
@@ -1688,7 +1676,7 @@ float convertirAPorcentaje(int valor) {
 //**************************************************************
 //             FUNCIÓN ARRANCAR MOSTRAR PANTALLA
 //**************************************************************
-void arrancar(){
+void pantallaWaitByPrint(){
     u8g2.clearBuffer(); 
     u8g2.drawXBMP( 0, 0, 128, 64, bitmap_screenshots[0]); // draw screenshot
     u8g2.sendBuffer();
